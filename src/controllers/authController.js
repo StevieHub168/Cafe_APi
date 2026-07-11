@@ -33,6 +33,23 @@ class AuthController {
         }
     }
 
+    // POST /api/auth/telegram-login - Auto-login the recognized Telegram admin, no password
+    static async telegramLogin(req, res) {
+        try {
+            const { initData } = req.body;
+
+            if (!initData) {
+                return res.status(400).json({ error: 'initData is required' });
+            }
+
+            const result = await AuthService.telegramLogin(initData);
+            res.status(200).json(result);
+        } catch (error) {
+            const status = error.notAuthorized ? 403 : 401;
+            res.status(status).json({ error: error.message });
+        }
+    }
+
     // POST /api/auth/logout
     static async logout(req, res) {
         try {

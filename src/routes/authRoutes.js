@@ -9,6 +9,9 @@ router.post('/register', requireAuth, requireAdmin, AuthController.register);
 // POST /api/auth/login - User login
 router.post('/login', AuthController.login);
 
+// POST /api/auth/telegram-login - Auto-login the recognized Telegram admin (no password)
+router.post('/telegram-login', AuthController.telegramLogin);
+
 // POST /api/auth/logout - User logout (requires authentication)
 router.post('/logout', requireAuth, AuthController.logout);
 

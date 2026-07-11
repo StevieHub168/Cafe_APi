@@ -7,6 +7,7 @@ const itemRoutes = require('./routes/itemRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const telegramRoutes = require('./routes/telegramRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 const app = express();
 app.disable('x-powered-by');
 
@@ -17,8 +18,8 @@ app.use(cors({
 }));
 
 // Parse JSON from Angular requests - 50MB limit for base64 images
-app.use(express.json({ limit: '999999mb' }));
-app.use(express.urlencoded({ limit: '999999mb', extended: true }));
+app.use(express.json({ limit: '1000mb' }));
+app.use(express.urlencoded({ limit: '1000mb', extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -26,5 +27,6 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/telegram', telegramRoutes);
+app.use('/api/reports', reportRoutes);
 
 module.exports = app;
