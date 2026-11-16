@@ -1,91 +1,80 @@
-const db = require('../config/database');
+const Category = require('../models/Category');
+const { removeImage } = require('../utils/uploads');
 
-/**
- * Get all categories
- */
-async function getAllCategories() {
-    const [categories] = await db.query(
-        'SELECT id, name, description, created_at FROM categories ORDER BY name ASC'
-    );
-    return categories;
+// Brand names: trimmed, 1-100 characters.
+function cleanBrand(name) {
+    const value = String(name ?? '').trim();
+    if (!value) throw new Error('Brand name is required');
+    if (value.length > 100) throw new Error('Brand name is too long (max 100 characters)');
+    return value;
 }
 
-/**
- * Create new category
- */
-async function createCategory(data) {
-    const { name, description } = data;
-
-    // Check if category already exists
-    const [existing] = await db.query(
-        'SELECT id FROM categories WHERE name = ?',
-        [name]
-    );
-
-    if (existing.length > 0) {
-        throw new Error(`Category "${name}" already exists`);
+class CategoryService {
+    static async getAllCategories() {
+        return await Category.findAll();
     }
 
-    const [result] = await db.query(
-        'INSERT INTO categories (name, description) VALUES (?, ?)',
-        [name, description || null]
-    );
+    static async getCategoryById(id) {
+        const category = await Category.findById(id);
+        if (!category) throw new Error('Category not found');
+        return category;
+    }
 
-    return {
-        id: result.insertId,
-        name,
-        description
-    };
-}
+    static async createCategory(data) {
+        const name = String(data.name || '').trim();
+        if (!name) throw new Error('Category name is required');
 
-/**
- * Update category
- */
-async function updateCategory(id, data) {
-    const { name, description } = data;
+        const existing = await Category.findByName(name);
+        if (existing) throw new Error('Category already exists');
 
-    // Check if new name conflicts with existing category
-    if (name) {
-        const [existing] = await db.query(
-            'SELECT id FROM categories WHERE name = ? AND id != ?',
-            [name, id]
-        );
+        const id = await Category.create({ name, description: data.description });
+        return await Category.findById(id);
+    }
 
-        if (existing.length > 0) {
-            throw new Error(`Category "${name}" already exists`);
+    static async updateCategory(id, data) {
+        const current = await Category.findById(id);
+        if (!current) throw new Error('Category not found');
+
+        const changes = {};
+        if (data.name !== undefined) {
+            const name = String(data.name).trim();
+            if (!name) throw new Error('Category name is required');
+            const existing = await Category.findByName(name);
+            if (existing && Number(existing.id) !== Number(id)) throw new Error('Category already exists');
+            changes.name = name;
         }
+        if (data.description !== undefined) changes.description = data.description || null;
+
+        await Category.update(id, changes);
+        return await Category.findById(id);
     }
 
-    await db.query(
-        'UPDATE categories SET name = ?, description = ? WHERE id = ?',
-        [name, description || null, id]
-    );
+    static async deleteCategory(id) {
+        const current = await Category.findById(id);
+        if (!current) throw new Error('Category not found');
 
-    return { id, name, description };
-}
-
-/**
- * Delete category
- */
-async function deleteCategory(id) {
-    // Check if any items use this category
-    const [items] = await db.query(
-        'SELECT COUNT(*) as count FROM items WHERE category_id = ?',
-        [id]
-    );
-
-    if (items[0].count > 0) {
-        throw new Error(`Cannot delete category: ${items[0].count} items are using it`);
+        const { deletedProducts, imageUrls } = await Category.deleteWithProducts(id);
+        imageUrls.forEach(removeImage);
+        const extra = deletedProducts > 0 ? ` and ${deletedProducts} product(s)` : '';
+        return { message: `Category deleted${extra}`, deletedProducts };
     }
 
-    await db.query('DELETE FROM categories WHERE id = ?', [id]);
+    static async addBrand(id, name) {
+        await Category.addBrand(id, cleanBrand(name));
+        return await Category.findById(id);
+    }
 
-    return { message: 'Category deleted successfully' };
+    static async renameBrand(id, from, to) {
+        await Category.renameBrand(id, cleanBrand(from), cleanBrand(to));
+        return await Category.findById(id);
+    }
+
+    static async deleteBrand(id, name) {
+        const { deletedProducts, imageUrls } = await Category.deleteBrand(id, cleanBrand(name));
+        imageUrls.forEach(removeImage);
+        const extra = deletedProducts > 0 ? ` and ${deletedProducts} product(s)` : '';
+        return { message: `Brand deleted${extra}`, deletedProducts, category: await Category.findById(id) };
+    }
 }
 
-module.exports = {
-    getAllCategories,
-    createCategory,
-    updateCategory,
-    deleteCategory
-};
+module.exports = CategoryService;

@@ -4,8 +4,7 @@ const crypto = require('node:crypto');
 const User = require('../models/User');
 
 class AuthService {
-    static async createUser(username, email, password) {
-        // Check if user already exists
+    static async createUser(username, email, password, fullName, role = 'staff', phone = null) {
         const existingUserByEmail = await User.findByEmail(email);
         if (existingUserByEmail) {
             throw new Error('Email already registered');
@@ -16,26 +15,16 @@ class AuthService {
             throw new Error('Username already taken');
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create user
-        const userId = await User.create(username, email, hashedPassword);
-
-        // Get user info (without password)
+        const userId = await User.create(username, email, hashedPassword, fullName, role, phone);
         return User.findById(userId);
     }
 
-    // Register new user
-    static async register(username, email, password) {
-        const user = await this.createUser(username, email, password);
-
-        // Generate JWT token
+    static async register(data) {
+        const { username, email, password, full_name, role, phone } = data;
+        const user = await this.createUser(username, email, password, full_name || username, role || 'staff', phone);
         const token = this.generateToken(user.id);
-
-        // Save token to database
         await User.saveAccessToken(user.id, token);
-
         return { user, token };
     }
 
@@ -59,10 +48,9 @@ class AuthService {
         // Save token to database
         await User.saveAccessToken(user.id, token);
 
-        // Remove password from response
-        delete user.password;
-
-        return { user, token };
+        // Return a sanitized user record without password/access_token fields.
+        const safeUser = await User.findById(user.id);
+        return { user: safeUser, token };
     }
 
     // Get user by ID
@@ -169,9 +157,9 @@ class AuthService {
 
         const token = this.generateToken(user.id);
         await User.saveAccessToken(user.id, token);
-        delete user.password;
+        const safeUser = await User.findById(user.id);
 
-        return { user, token };
+        return { user: safeUser, token };
     }
 }
 

@@ -15,6 +15,9 @@ router.post('/telegram-login', AuthController.telegramLogin);
 // POST /api/auth/logout - User logout (requires authentication)
 router.post('/logout', requireAuth, AuthController.logout);
 
+// GET /api/auth/me - Get current authenticated user
+router.get('/me', requireAuth, AuthController.me);
+
 // GET /api/auth/user/:id - Get user info
 router.get('/user/:id', AuthController.getUserInfo);
 

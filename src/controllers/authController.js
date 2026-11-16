@@ -1,23 +1,21 @@
 const AuthService = require('../services/authService');
 
 class AuthController {
-    // POST /api/auth/register
     static async register(req, res) {
         try {
-            const { username, email, password } = req.body;
+            const { username, email, password, full_name, role, phone } = req.body;
 
             if (!username || !email || !password) {
                 return res.status(400).json({ error: 'Username, email, and password are required' });
             }
 
-            const result = await AuthService.createUser(username, email, password);
+            const result = await AuthService.register({ username, email, password, full_name, role, phone });
             res.status(201).json(result);
         } catch (error) {
             res.status(400).json({ error: error.message });
         }
     }
 
-    // POST /api/auth/login
     static async login(req, res) {
         try {
             const { email, password } = req.body;
@@ -33,7 +31,6 @@ class AuthController {
         }
     }
 
-    // POST /api/auth/telegram-login - Auto-login the recognized Telegram admin, no password
     static async telegramLogin(req, res) {
         try {
             const { initData } = req.body;
@@ -56,6 +53,16 @@ class AuthController {
             res.status(200).json({ message: 'Logged out successfully' });
         } catch (error) {
             res.status(500).json({ error: error.message });
+        }
+    }
+
+    // GET /api/auth/me
+    static async me(req, res) {
+        try {
+            const user = await AuthService.getUserById(req.user.userId);
+            res.status(200).json({ user });
+        } catch (error) {
+            res.status(404).json({ error: error.message });
         }
     }
 
