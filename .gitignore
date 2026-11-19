@@ -7,3 +7,6 @@ npm-debug.log*
 
 # Uploaded product images (user data, not source code)
 uploads/
+
+# TypeScript build
+dist/

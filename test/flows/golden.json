@@ -1,0 +1,5578 @@
+{
+ "answers": [
+  {
+   "label": "login owner",
+   "method": "POST",
+   "path": "/auth/login",
+   "status": 200,
+   "body": {
+    "user": {
+     "id": 1,
+     "username": "owner",
+     "email": "owner@test.local",
+     "full_name": "The Owner",
+     "role": "admin",
+     "phone": null,
+     "created_at": "<time>"
+    },
+    "token": "<token>"
+   }
+  },
+  {
+   "label": "login helper",
+   "method": "POST",
+   "path": "/auth/login",
+   "status": 200,
+   "body": {
+    "user": {
+     "id": 2,
+     "username": "helper",
+     "email": "helper@test.local",
+     "full_name": "The Helper",
+     "role": "staff",
+     "phone": null,
+     "created_at": "<time>"
+    },
+    "token": "<token>"
+   }
+  },
+  {
+   "label": "login wrong password",
+   "method": "POST",
+   "path": "/auth/login",
+   "status": 401,
+   "body": {
+    "error": "Invalid email or password"
+   }
+  },
+  {
+   "label": "login unknown email",
+   "method": "POST",
+   "path": "/auth/login",
+   "status": 401,
+   "body": {
+    "error": "Invalid email or password"
+   }
+  },
+  {
+   "label": "login missing password",
+   "method": "POST",
+   "path": "/auth/login",
+   "status": 400,
+   "body": {
+    "error": "Email and password are required"
+   }
+  },
+  {
+   "label": "login with no body",
+   "method": "POST",
+   "path": "/auth/login",
+   "status": 400,
+   "body": {
+    "error": "Email and password are required"
+   }
+  },
+  {
+   "label": "telegram-login without data",
+   "method": "POST",
+   "path": "/auth/telegram-login",
+   "status": 400,
+   "body": {
+    "error": "initData is required"
+   }
+  },
+  {
+   "label": "telegram-login forged data",
+   "method": "POST",
+   "path": "/auth/telegram-login",
+   "status": 401,
+   "body": {
+    "error": "Invalid Telegram authentication data"
+   }
+  },
+  {
+   "label": "me",
+   "method": "GET",
+   "path": "/auth/me",
+   "status": 200,
+   "body": {
+    "user": {
+     "id": 1,
+     "username": "owner",
+     "email": "owner@test.local",
+     "full_name": "The Owner",
+     "role": "admin",
+     "phone": null,
+     "created_at": "<time>"
+    }
+   }
+  },
+  {
+   "label": "me without token",
+   "method": "GET",
+   "path": "/auth/me",
+   "status": 401,
+   "body": {
+    "error": "No token provided"
+   }
+  },
+  {
+   "label": "me with a made-up token",
+   "method": "GET",
+   "path": "/auth/me",
+   "status": 401,
+   "body": {
+    "error": "Invalid token"
+   }
+  },
+  {
+   "label": "user info",
+   "method": "GET",
+   "path": "/auth/user/2",
+   "status": 200,
+   "body": {
+    "id": 2,
+    "username": "helper",
+    "email": "helper@test.local",
+    "full_name": "The Helper",
+    "role": "staff",
+    "phone": null,
+    "created_at": "<time>"
+   }
+  },
+  {
+   "label": "user info missing",
+   "method": "GET",
+   "path": "/auth/user/999",
+   "status": 404,
+   "body": {
+    "error": "User not found"
+   }
+  },
+  {
+   "label": "user info as staff",
+   "method": "GET",
+   "path": "/auth/user/1",
+   "status": 403,
+   "body": {
+    "error": "Admin access required"
+   }
+  },
+  {
+   "label": "users list",
+   "method": "GET",
+   "path": "/users",
+   "status": 200,
+   "body": [
+    {
+     "id": 1,
+     "username": "owner",
+     "email": "owner@test.local",
+     "full_name": "The Owner",
+     "role": "admin",
+     "phone": null,
+     "created_at": "<time>"
+    },
+    {
+     "id": 2,
+     "username": "helper",
+     "email": "helper@test.local",
+     "full_name": "The Helper",
+     "role": "staff",
+     "phone": null,
+     "created_at": "<time>"
+    }
+   ]
+  },
+  {
+   "label": "users list as staff",
+   "method": "GET",
+   "path": "/users",
+   "status": 403,
+   "body": {
+    "error": "Admin access required"
+   }
+  },
+  {
+   "label": "register without fields",
+   "method": "POST",
+   "path": "/auth/register",
+   "status": 400,
+   "body": {
+    "error": "Email and password are required"
+   }
+  },
+  {
+   "label": "register staff",
+   "method": "POST",
+   "path": "/auth/register",
+   "status": 201,
+   "body": {
+    "user": {
+     "id": 3,
+     "username": "newbie",
+     "email": "newbie@test.local",
+     "full_name": "New Person",
+     "role": "staff",
+     "phone": "011 222 333",
+     "created_at": "<time>"
+    },
+    "token": "<token>"
+   }
+  },
+  {
+   "label": "register duplicate email",
+   "method": "POST",
+   "path": "/auth/register",
+   "status": 409,
+   "body": {
+    "error": "Email already registered"
+   }
+  },
+  {
+   "label": "register duplicate username",
+   "method": "POST",
+   "path": "/auth/register",
+   "status": 409,
+   "body": {
+    "error": "Username already taken"
+   }
+  },
+  {
+   "label": "register as staff",
+   "method": "POST",
+   "path": "/auth/register",
+   "status": 403,
+   "body": {
+    "error": "Admin access required"
+   }
+  },
+  {
+   "label": "reset password too short",
+   "method": "PUT",
+   "path": "/users/3/password",
+   "status": 400,
+   "body": {
+    "error": "The password must be at least 8 characters"
+   }
+  },
+  {
+   "label": "reset password empty",
+   "method": "PUT",
+   "path": "/users/3/password",
+   "status": 400,
+   "body": {
+    "error": "Write the new password"
+   }
+  },
+  {
+   "label": "reset password of nobody",
+   "method": "PUT",
+   "path": "/users/999/password",
+   "status": 404,
+   "body": {
+    "error": "User not found"
+   }
+  },
+  {
+   "label": "reset password",
+   "method": "PUT",
+   "path": "/users/3/password",
+   "status": 200,
+   "body": {
+    "message": "Password changed"
+   }
+  },
+  {
+   "label": "login with the new password",
+   "method": "POST",
+   "path": "/auth/login",
+   "status": 200,
+   "body": {
+    "user": {
+     "id": 3,
+     "username": "newbie",
+     "email": "newbie@test.local",
+     "full_name": "New Person",
+     "role": "staff",
+     "phone": "011 222 333",
+     "created_at": "<time>"
+    },
+    "token": "<token>"
+   }
+  },
+  {
+   "label": "login with the old password",
+   "method": "POST",
+   "path": "/auth/login",
+   "status": 401,
+   "body": {
+    "error": "Invalid email or password"
+   }
+  },
+  {
+   "label": "logout helper",
+   "method": "POST",
+   "path": "/auth/logout",
+   "status": 200,
+   "body": {
+    "message": "Logged out successfully"
+   }
+  },
+  {
+   "label": "helper token after logout",
+   "method": "GET",
+   "path": "/auth/me",
+   "status": 401,
+   "body": {
+    "error": "Token has been invalidated. Please login again."
+   }
+  },
+  {
+   "label": "login helper again",
+   "method": "POST",
+   "path": "/auth/login",
+   "status": 200,
+   "body": {
+    "user": {
+     "id": 2,
+     "username": "helper",
+     "email": "helper@test.local",
+     "full_name": "The Helper",
+     "role": "staff",
+     "phone": null,
+     "created_at": "<time>"
+    },
+    "token": "<token>"
+   }
+  },
+  {
+   "label": "products without token",
+   "method": "GET",
+   "path": "/products",
+   "status": 401,
+   "body": {
+    "error": "No token provided"
+   }
+  },
+  {
+   "label": "a path that does not exist",
+   "method": "GET",
+   "path": "/nothing-here",
+   "status": 404,
+   "body": {
+    "error": "Not found"
+   }
+  },
+  {
+   "label": "categories (none yet)",
+   "method": "GET",
+   "path": "/categories",
+   "status": 200,
+   "body": []
+  },
+  {
+   "label": "create Mac",
+   "method": "POST",
+   "path": "/categories",
+   "status": 201,
+   "body": {
+    "id": 1,
+    "name": "Mac",
+    "description": "Apple Mac laptops",
+    "brands": null,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 0
+   }
+  },
+  {
+   "label": "create Windows",
+   "method": "POST",
+   "path": "/categories",
+   "status": 201,
+   "body": {
+    "id": 2,
+    "name": "Windows",
+    "description": "Windows laptops",
+    "brands": null,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 0
+   }
+  },
+  {
+   "label": "create category without name",
+   "method": "POST",
+   "path": "/categories",
+   "status": 400,
+   "body": {
+    "error": "Category name is required"
+   }
+  },
+  {
+   "label": "create duplicate category",
+   "method": "POST",
+   "path": "/categories",
+   "status": 409,
+   "body": {
+    "error": "Category already exists"
+   }
+  },
+  {
+   "label": "category by id",
+   "method": "GET",
+   "path": "/categories/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "name": "Mac",
+    "description": "Apple Mac laptops",
+    "brands": null,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 0
+   }
+  },
+  {
+   "label": "category missing",
+   "method": "GET",
+   "path": "/categories/999",
+   "status": 404,
+   "body": {
+    "error": "Category not found"
+   }
+  },
+  {
+   "label": "add brand Apple to Mac",
+   "method": "POST",
+   "path": "/categories/1/brands",
+   "status": 201,
+   "body": {
+    "id": 1,
+    "name": "Mac",
+    "description": "Apple Mac laptops",
+    "brands": [
+     "Apple"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 0
+   }
+  },
+  {
+   "label": "add brand Asus",
+   "method": "POST",
+   "path": "/categories/2/brands",
+   "status": 201,
+   "body": {
+    "id": 2,
+    "name": "Windows",
+    "description": "Windows laptops",
+    "brands": [
+     "Asus"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 0
+   }
+  },
+  {
+   "label": "add brand Dell",
+   "method": "POST",
+   "path": "/categories/2/brands",
+   "status": 201,
+   "body": {
+    "id": 2,
+    "name": "Windows",
+    "description": "Windows laptops",
+    "brands": [
+     "Asus",
+     "Dell"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 0
+   }
+  },
+  {
+   "label": "add brand HP",
+   "method": "POST",
+   "path": "/categories/2/brands",
+   "status": 201,
+   "body": {
+    "id": 2,
+    "name": "Windows",
+    "description": "Windows laptops",
+    "brands": [
+     "Asus",
+     "Dell",
+     "HP"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 0
+   }
+  },
+  {
+   "label": "add duplicate brand (other capitals)",
+   "method": "POST",
+   "path": "/categories/2/brands",
+   "status": 409,
+   "body": {
+    "error": "Brand already exists"
+   }
+  },
+  {
+   "label": "add brand without name",
+   "method": "POST",
+   "path": "/categories/2/brands",
+   "status": 400,
+   "body": {
+    "error": "Brand name is required"
+   }
+  },
+  {
+   "label": "add brand too long",
+   "method": "POST",
+   "path": "/categories/2/brands",
+   "status": 400,
+   "body": {
+    "error": "Brand name is too long (max 100 characters)"
+   }
+  },
+  {
+   "label": "add brand to missing category",
+   "method": "POST",
+   "path": "/categories/999/brands",
+   "status": 404,
+   "body": {
+    "error": "Category not found"
+   }
+  },
+  {
+   "label": "rename a brand to an existing one",
+   "method": "PUT",
+   "path": "/categories/2/brands/HP",
+   "status": 409,
+   "body": {
+    "error": "Brand already exists"
+   }
+  },
+  {
+   "label": "rename missing brand",
+   "method": "PUT",
+   "path": "/categories/2/brands/Nope",
+   "status": 404,
+   "body": {
+    "error": "Brand not found"
+   }
+  },
+  {
+   "label": "update category",
+   "method": "PUT",
+   "path": "/categories/2",
+   "status": 200,
+   "body": {
+    "id": 2,
+    "name": "Windows",
+    "description": "Windows laptops (all makes)",
+    "brands": [
+     "Asus",
+     "Dell",
+     "HP"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 0
+   }
+  },
+  {
+   "label": "update category to a taken name",
+   "method": "PUT",
+   "path": "/categories/2",
+   "status": 409,
+   "body": {
+    "error": "Category already exists"
+   }
+  },
+  {
+   "label": "update category with an empty name",
+   "method": "PUT",
+   "path": "/categories/2",
+   "status": 400,
+   "body": {
+    "error": "Category name is required"
+   }
+  },
+  {
+   "label": "update missing category",
+   "method": "PUT",
+   "path": "/categories/999",
+   "status": 404,
+   "body": {
+    "error": "Category not found"
+   }
+  },
+  {
+   "label": "categories",
+   "method": "GET",
+   "path": "/categories",
+   "status": 200,
+   "body": [
+    {
+     "id": 1,
+     "name": "Mac",
+     "description": "Apple Mac laptops",
+     "brands": [
+      "Apple"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_count": 0
+    },
+    {
+     "id": 2,
+     "name": "Windows",
+     "description": "Windows laptops (all makes)",
+     "brands": [
+      "Asus",
+      "Dell",
+      "HP"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_count": 0
+    }
+   ]
+  },
+  {
+   "label": "create Mac laptop (brand and sku automatic)",
+   "method": "POST",
+   "path": "/products",
+   "status": 201,
+   "body": {
+    "id": 1,
+    "sku": "MAC-001",
+    "code": "LP-0001",
+    "name": "MacBook Air 13\" M2",
+    "category_id": 1,
+    "brand": "Apple",
+    "model": null,
+    "description": "Chip M2\nRam 8GB | Storage 256GB",
+    "selling_price": "1099.00",
+    "extra_prices": [
+     {
+      "label": "16GB / 512GB",
+      "price": 1299
+     }
+    ],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/a.jpg",
+    "images": [
+     "https://example.com/a.jpg",
+     "https://example.com/b.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Mac"
+   }
+  },
+  {
+   "label": "create Windows laptop with a brand",
+   "method": "POST",
+   "path": "/products",
+   "status": 201,
+   "body": {
+    "id": 2,
+    "sku": "WIN-ASU-001",
+    "code": "LP-0002",
+    "name": "Asus TUF A15",
+    "category_id": 2,
+    "brand": "Asus",
+    "model": null,
+    "description": "Ryzen 7",
+    "selling_price": "749.50",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "create counted stock",
+   "method": "POST",
+   "path": "/products",
+   "status": 201,
+   "body": {
+    "id": 3,
+    "sku": "WIN-DEL-001",
+    "code": "LP-0003",
+    "name": "Dell Inspiron 15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": null,
+    "selling_price": "520.00",
+    "extra_prices": [],
+    "track_stock": 1,
+    "stock_quantity": 3,
+    "min_stock_level": 1,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/d.png",
+    "images": [
+     "https://example.com/d.png"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "create another single laptop",
+   "method": "POST",
+   "path": "/products",
+   "status": 201,
+   "body": {
+    "id": 4,
+    "sku": "MY-SKU-1",
+    "code": "LP-0004",
+    "name": "HP Pavilion",
+    "category_id": 2,
+    "brand": "HP",
+    "model": null,
+    "description": null,
+    "selling_price": "640.00",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "create Windows without brand",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "Brand is required for Windows. Choose one of: Asus, Dell, HP"
+   }
+  },
+  {
+   "label": "create with a brand that is not allowed",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "Brand \"Toshiba\" is not allowed for Windows. Choose one of: Asus, Dell, HP"
+   }
+  },
+  {
+   "label": "create without a name",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "Name and category are required"
+   }
+  },
+  {
+   "label": "create without a category",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "Name and category are required"
+   }
+  },
+  {
+   "label": "create in a missing category",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "Category not found"
+   }
+  },
+  {
+   "label": "create with a bad price",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "Price must be a number of 0 or more"
+   }
+  },
+  {
+   "label": "create with a text price",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "Price must be a number of 0 or more"
+   }
+  },
+  {
+   "label": "create with a duplicate sku",
+   "method": "POST",
+   "path": "/products",
+   "status": 409,
+   "body": {
+    "error": "SKU already exists"
+   }
+  },
+  {
+   "label": "create with a bad photo",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "A photo must be an uploaded file or a link that starts with http:// or https://"
+   }
+  },
+  {
+   "label": "create with photos that are not a list",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "Photos must be a list"
+   }
+  },
+  {
+   "label": "create with a half-filled extra price",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "Extra price 1 must be a number of 0 or more"
+   }
+  },
+  {
+   "label": "create with a bad stock count",
+   "method": "POST",
+   "path": "/products",
+   "status": 400,
+   "body": {
+    "error": "Stock must be a whole number of 0 or more"
+   }
+  },
+  {
+   "label": "products (menu list)",
+   "method": "GET",
+   "path": "/products",
+   "status": 200,
+   "body": [
+    {
+     "id": 1,
+     "sku": "MAC-001",
+     "code": "LP-0001",
+     "name": "MacBook Air 13\" M2",
+     "category_id": 1,
+     "brand": "Apple",
+     "model": null,
+     "description": "Chip M2\nRam 8GB | Storage 256GB",
+     "selling_price": "1099.00",
+     "extra_prices": [
+      {
+       "label": "16GB / 512GB",
+       "price": 1299
+      }
+     ],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": "https://example.com/a.jpg",
+     "images": [
+      "https://example.com/a.jpg",
+      "https://example.com/b.jpg"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Mac"
+    },
+    {
+     "id": 2,
+     "sku": "WIN-ASU-001",
+     "code": "LP-0002",
+     "name": "Asus TUF A15",
+     "category_id": 2,
+     "brand": "Asus",
+     "model": null,
+     "description": "Ryzen 7",
+     "selling_price": "749.50",
+     "extra_prices": [],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    },
+    {
+     "id": 3,
+     "sku": "WIN-DEL-001",
+     "code": "LP-0003",
+     "name": "Dell Inspiron 15",
+     "category_id": 2,
+     "brand": "Dell",
+     "model": null,
+     "description": null,
+     "selling_price": "520.00",
+     "extra_prices": [],
+     "track_stock": 1,
+     "stock_quantity": 3,
+     "min_stock_level": 1,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": "https://example.com/d.png",
+     "images": [
+      "https://example.com/d.png"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    },
+    {
+     "id": 4,
+     "sku": "MY-SKU-1",
+     "code": "LP-0004",
+     "name": "HP Pavilion",
+     "category_id": 2,
+     "brand": "HP",
+     "model": null,
+     "description": null,
+     "selling_price": "640.00",
+     "extra_prices": [],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    }
+   ]
+  },
+  {
+   "label": "products (with archived)",
+   "method": "GET",
+   "path": "/products?include_archived=true",
+   "status": 200,
+   "body": [
+    {
+     "id": 1,
+     "sku": "MAC-001",
+     "code": "LP-0001",
+     "name": "MacBook Air 13\" M2",
+     "category_id": 1,
+     "brand": "Apple",
+     "model": null,
+     "description": "Chip M2\nRam 8GB | Storage 256GB",
+     "selling_price": "1099.00",
+     "extra_prices": [
+      {
+       "label": "16GB / 512GB",
+       "price": 1299
+      }
+     ],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": "https://example.com/a.jpg",
+     "images": [
+      "https://example.com/a.jpg",
+      "https://example.com/b.jpg"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Mac"
+    },
+    {
+     "id": 2,
+     "sku": "WIN-ASU-001",
+     "code": "LP-0002",
+     "name": "Asus TUF A15",
+     "category_id": 2,
+     "brand": "Asus",
+     "model": null,
+     "description": "Ryzen 7",
+     "selling_price": "749.50",
+     "extra_prices": [],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    },
+    {
+     "id": 3,
+     "sku": "WIN-DEL-001",
+     "code": "LP-0003",
+     "name": "Dell Inspiron 15",
+     "category_id": 2,
+     "brand": "Dell",
+     "model": null,
+     "description": null,
+     "selling_price": "520.00",
+     "extra_prices": [],
+     "track_stock": 1,
+     "stock_quantity": 3,
+     "min_stock_level": 1,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": "https://example.com/d.png",
+     "images": [
+      "https://example.com/d.png"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    },
+    {
+     "id": 4,
+     "sku": "MY-SKU-1",
+     "code": "LP-0004",
+     "name": "HP Pavilion",
+     "category_id": 2,
+     "brand": "HP",
+     "model": null,
+     "description": null,
+     "selling_price": "640.00",
+     "extra_prices": [],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    }
+   ]
+  },
+  {
+   "label": "product by id",
+   "method": "GET",
+   "path": "/products/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "sku": "MAC-001",
+    "code": "LP-0001",
+    "name": "MacBook Air 13\" M2",
+    "category_id": 1,
+    "brand": "Apple",
+    "model": null,
+    "description": "Chip M2\nRam 8GB | Storage 256GB",
+    "selling_price": "1099.00",
+    "extra_prices": [
+     {
+      "label": "16GB / 512GB",
+      "price": 1299
+     }
+    ],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/a.jpg",
+    "images": [
+     "https://example.com/a.jpg",
+     "https://example.com/b.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Mac"
+   }
+  },
+  {
+   "label": "product missing",
+   "method": "GET",
+   "path": "/products/999",
+   "status": 404,
+   "body": {
+    "error": "Product not found"
+   }
+  },
+  {
+   "label": "product by code",
+   "method": "GET",
+   "path": "/products/by-code/lp-0002",
+   "status": 200,
+   "body": {
+    "id": 2,
+    "sku": "WIN-ASU-001",
+    "code": "LP-0002",
+    "name": "Asus TUF A15",
+    "category_id": 2,
+    "brand": "Asus",
+    "model": null,
+    "description": "Ryzen 7",
+    "selling_price": "749.50",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "product by a code nobody has",
+   "method": "GET",
+   "path": "/products/by-code/LP-0999",
+   "status": 404,
+   "body": {
+    "error": "No laptop has that code"
+   }
+  },
+  {
+   "label": "product by a bad code",
+   "method": "GET",
+   "path": "/products/by-code/hello",
+   "status": 404,
+   "body": {
+    "error": "No laptop has that code"
+   }
+  },
+  {
+   "label": "low stock (none yet)",
+   "method": "GET",
+   "path": "/products/low-stock",
+   "status": 200,
+   "body": []
+  },
+  {
+   "label": "update product price and name",
+   "method": "PUT",
+   "path": "/products/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "sku": "MAC-001",
+    "code": "LP-0001",
+    "name": "MacBook Air 13\" M2 (new)",
+    "category_id": 1,
+    "brand": "Apple",
+    "model": null,
+    "description": "Chip M2\nRam 8GB | Storage 256GB",
+    "selling_price": "1049.00",
+    "extra_prices": [
+     {
+      "label": "16GB / 512GB",
+      "price": 1299
+     }
+    ],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/a.jpg",
+    "images": [
+     "https://example.com/a.jpg",
+     "https://example.com/b.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Mac"
+   }
+  },
+  {
+   "label": "update product with the SAME values",
+   "method": "PUT",
+   "path": "/products/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "sku": "MAC-001",
+    "code": "LP-0001",
+    "name": "MacBook Air 13\" M2 (new)",
+    "category_id": 1,
+    "brand": "Apple",
+    "model": null,
+    "description": "Chip M2\nRam 8GB | Storage 256GB",
+    "selling_price": "1049.00",
+    "extra_prices": [
+     {
+      "label": "16GB / 512GB",
+      "price": 1299
+     }
+    ],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/a.jpg",
+    "images": [
+     "https://example.com/a.jpg",
+     "https://example.com/b.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Mac"
+   }
+  },
+  {
+   "label": "update product with nothing to change",
+   "method": "PUT",
+   "path": "/products/1",
+   "status": 400,
+   "body": {
+    "error": "Product not found or no changes"
+   }
+  },
+  {
+   "label": "update product photos",
+   "method": "PUT",
+   "path": "/products/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "sku": "MAC-001",
+    "code": "LP-0001",
+    "name": "MacBook Air 13\" M2 (new)",
+    "category_id": 1,
+    "brand": "Apple",
+    "model": null,
+    "description": "Chip M2\nRam 8GB | Storage 256GB",
+    "selling_price": "1049.00",
+    "extra_prices": [
+     {
+      "label": "16GB / 512GB",
+      "price": 1299
+     }
+    ],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/z.jpg",
+    "images": [
+     "https://example.com/z.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Mac"
+   }
+  },
+  {
+   "label": "update product to a taken sku",
+   "method": "PUT",
+   "path": "/products/2",
+   "status": 409,
+   "body": {
+    "error": "SKU already exists"
+   }
+  },
+  {
+   "label": "update product to its own sku",
+   "method": "PUT",
+   "path": "/products/4",
+   "status": 200,
+   "body": {
+    "id": 4,
+    "sku": "MY-SKU-1",
+    "code": "LP-0004",
+    "name": "HP Pavilion",
+    "category_id": 2,
+    "brand": "HP",
+    "model": null,
+    "description": null,
+    "selling_price": "650.00",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "update product brand",
+   "method": "PUT",
+   "path": "/products/2",
+   "status": 200,
+   "body": {
+    "id": 2,
+    "sku": "WIN-ASU-001",
+    "code": "LP-0002",
+    "name": "Asus TUF A15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": "Ryzen 7",
+    "selling_price": "749.50",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "update product with a wrong brand",
+   "method": "PUT",
+   "path": "/products/2",
+   "status": 400,
+   "body": {
+    "error": "Brand \"Toshiba\" is not allowed for Windows. Choose one of: Asus, Dell, HP"
+   }
+  },
+  {
+   "label": "update product to a missing category",
+   "method": "PUT",
+   "path": "/products/2",
+   "status": 400,
+   "body": {
+    "error": "Category not found"
+   }
+  },
+  {
+   "label": "update counted stock",
+   "method": "PUT",
+   "path": "/products/3",
+   "status": 200,
+   "body": {
+    "id": 3,
+    "sku": "WIN-DEL-001",
+    "code": "LP-0003",
+    "name": "Dell Inspiron 15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": null,
+    "selling_price": "520.00",
+    "extra_prices": [],
+    "track_stock": 1,
+    "stock_quantity": 1,
+    "min_stock_level": 2,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/d.png",
+    "images": [
+     "https://example.com/d.png"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "low stock",
+   "method": "GET",
+   "path": "/products/low-stock",
+   "status": 200,
+   "body": [
+    {
+     "id": 3,
+     "sku": "WIN-DEL-001",
+     "code": "LP-0003",
+     "name": "Dell Inspiron 15",
+     "category_id": 2,
+     "brand": "Dell",
+     "model": null,
+     "description": null,
+     "selling_price": "520.00",
+     "extra_prices": [],
+     "track_stock": 1,
+     "stock_quantity": 1,
+     "min_stock_level": 2,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": "https://example.com/d.png",
+     "images": [
+      "https://example.com/d.png"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    }
+   ]
+  },
+  {
+   "label": "turn counted stock into a single laptop",
+   "method": "PUT",
+   "path": "/products/3",
+   "status": 200,
+   "body": {
+    "id": 3,
+    "sku": "WIN-DEL-001",
+    "code": "LP-0003",
+    "name": "Dell Inspiron 15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": null,
+    "selling_price": "520.00",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/d.png",
+    "images": [
+     "https://example.com/d.png"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "turn it back to counted stock",
+   "method": "PUT",
+   "path": "/products/3",
+   "status": 200,
+   "body": {
+    "id": 3,
+    "sku": "WIN-DEL-001",
+    "code": "LP-0003",
+    "name": "Dell Inspiron 15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": null,
+    "selling_price": "520.00",
+    "extra_prices": [],
+    "track_stock": 1,
+    "stock_quantity": 3,
+    "min_stock_level": 1,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/d.png",
+    "images": [
+     "https://example.com/d.png"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "update missing product",
+   "method": "PUT",
+   "path": "/products/999",
+   "status": 404,
+   "body": {
+    "error": "Product not found"
+   }
+  },
+  {
+   "label": "rename a brand (renames its products)",
+   "method": "PUT",
+   "path": "/categories/2/brands/Dell",
+   "status": 200,
+   "body": {
+    "id": 2,
+    "name": "Windows",
+    "description": "Windows laptops (all makes)",
+    "brands": [
+     "Asus",
+     "Dell Inc",
+     "HP"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 3
+   }
+  },
+  {
+   "label": "product after the brand rename",
+   "method": "GET",
+   "path": "/products/3",
+   "status": 200,
+   "body": {
+    "id": 3,
+    "sku": "WIN-DEL-001",
+    "code": "LP-0003",
+    "name": "Dell Inspiron 15",
+    "category_id": 2,
+    "brand": "Dell Inc",
+    "model": null,
+    "description": null,
+    "selling_price": "520.00",
+    "extra_prices": [],
+    "track_stock": 1,
+    "stock_quantity": 3,
+    "min_stock_level": 1,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/d.png",
+    "images": [
+     "https://example.com/d.png"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "rename it back",
+   "method": "PUT",
+   "path": "/categories/2/brands/Dell%20Inc",
+   "status": 200,
+   "body": {
+    "id": 2,
+    "name": "Windows",
+    "description": "Windows laptops (all makes)",
+    "brands": [
+     "Asus",
+     "Dell",
+     "HP"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 3
+   }
+  },
+  {
+   "label": "book the single Mac",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 201,
+   "body": {
+    "id": 1,
+    "product_id": 1,
+    "product_name": "MacBook Air 13\" M2",
+    "phone": null,
+    "telegram": "@Horth_Heng",
+    "full_price": 1049,
+    "deposit": 300,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "booked",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": true,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/z.jpg",
+    "product_track_stock": false,
+    "sale_invoice_number": null,
+    "remaining_balance": 749
+   }
+  },
+  {
+   "label": "Mac after it was booked",
+   "method": "GET",
+   "path": "/products/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "sku": "MAC-001",
+    "code": "LP-0001",
+    "name": "MacBook Air 13\" M2 (new)",
+    "category_id": 1,
+    "brand": "Apple",
+    "model": null,
+    "description": "Chip M2\nRam 8GB | Storage 256GB",
+    "selling_price": "1049.00",
+    "extra_prices": [
+     {
+      "label": "16GB / 512GB",
+      "price": 1299
+     }
+    ],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": "booked",
+    "image_url": "https://example.com/z.jpg",
+    "images": [
+     "https://example.com/z.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Mac"
+   }
+  },
+  {
+   "label": "menu list without the booked laptop",
+   "method": "GET",
+   "path": "/products",
+   "status": 200,
+   "body": [
+    {
+     "id": 2,
+     "sku": "WIN-ASU-001",
+     "code": "LP-0002",
+     "name": "Asus TUF A15",
+     "category_id": 2,
+     "brand": "Dell",
+     "model": null,
+     "description": "Ryzen 7",
+     "selling_price": "749.50",
+     "extra_prices": [],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    },
+    {
+     "id": 3,
+     "sku": "WIN-DEL-001",
+     "code": "LP-0003",
+     "name": "Dell Inspiron 15",
+     "category_id": 2,
+     "brand": "Dell",
+     "model": null,
+     "description": null,
+     "selling_price": "520.00",
+     "extra_prices": [],
+     "track_stock": 1,
+     "stock_quantity": 3,
+     "min_stock_level": 1,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": "https://example.com/d.png",
+     "images": [
+      "https://example.com/d.png"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    },
+    {
+     "id": 4,
+     "sku": "MY-SKU-1",
+     "code": "LP-0004",
+     "name": "HP Pavilion",
+     "category_id": 2,
+     "brand": "HP",
+     "model": null,
+     "description": null,
+     "selling_price": "650.00",
+     "extra_prices": [],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    }
+   ]
+  },
+  {
+   "label": "book the same laptop again",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 409,
+   "body": {
+    "error": "This laptop is already booked"
+   }
+  },
+  {
+   "label": "book with a missing product",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 400,
+   "body": {
+    "error": "That product no longer exists"
+   }
+  },
+  {
+   "label": "book without a product name",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 400,
+   "body": {
+    "error": "Product is required"
+   }
+  },
+  {
+   "label": "book without a way to reach the customer",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 400,
+   "body": {
+    "error": "Add a phone number or a Telegram username so the customer can be reached"
+   }
+  },
+  {
+   "label": "book with a price of 0",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 400,
+   "body": {
+    "error": "Full price must be more than 0"
+   }
+  },
+  {
+   "label": "book with a deposit above the price",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 400,
+   "body": {
+    "error": "Deposit cannot be more than the full price"
+   }
+  },
+  {
+   "label": "book with a wrong phone",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 400,
+   "body": {
+    "error": "Phone number looks wrong. Use digits only, e.g. 011 968 240"
+   }
+  },
+  {
+   "label": "book with a wrong telegram",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 400,
+   "body": {
+    "error": "Telegram username looks wrong. Example: @Horth_Heng (2-32 letters, numbers or _)"
+   }
+  },
+  {
+   "label": "book with pickup before booking",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 400,
+   "body": {
+    "error": "Pickup date cannot be before the booking date"
+   }
+  },
+  {
+   "label": "book with a date that does not exist",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 400,
+   "body": {
+    "error": "Pickup date must be a real date"
+   }
+  },
+  {
+   "label": "book with a wrong status",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 400,
+   "body": {
+    "error": "Status must be one of: booked, picked_up, cancelled"
+   }
+  },
+  {
+   "label": "book a laptop typed by hand",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 201,
+   "body": {
+    "id": 2,
+    "product_id": null,
+    "product_name": "Lenovo ThinkPad | i7",
+    "phone": "+855 11 968 240",
+    "telegram": null,
+    "full_price": 800,
+    "deposit": 0,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "booked",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": false,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": null,
+    "product_track_stock": null,
+    "sale_invoice_number": null,
+    "remaining_balance": 800
+   }
+  },
+  {
+   "label": "book the counted stock",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 201,
+   "body": {
+    "id": 3,
+    "product_id": 3,
+    "product_name": "Dell Inspiron 15",
+    "phone": null,
+    "telegram": "@Horth_Heng",
+    "full_price": 520,
+    "deposit": 100,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "booked",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": true,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/d.png",
+    "product_track_stock": true,
+    "sale_invoice_number": null,
+    "remaining_balance": 420
+   }
+  },
+  {
+   "label": "counted stock after the booking (one less)",
+   "method": "GET",
+   "path": "/products/3",
+   "status": 200,
+   "body": {
+    "id": 3,
+    "sku": "WIN-DEL-001",
+    "code": "LP-0003",
+    "name": "Dell Inspiron 15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": null,
+    "selling_price": "520.00",
+    "extra_prices": [],
+    "track_stock": 1,
+    "stock_quantity": 2,
+    "min_stock_level": 1,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/d.png",
+    "images": [
+     "https://example.com/d.png"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "bookings",
+   "method": "GET",
+   "path": "/bookings",
+   "status": 200,
+   "body": [
+    {
+     "id": 3,
+     "product_id": 3,
+     "product_name": "Dell Inspiron 15",
+     "phone": null,
+     "telegram": "@Horth_Heng",
+     "full_price": 520,
+     "deposit": 100,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "booked",
+     "images": [],
+     "sale_invoice_id": null,
+     "stock_held": true,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": "https://example.com/d.png",
+     "product_track_stock": true,
+     "sale_invoice_number": null,
+     "remaining_balance": 420
+    },
+    {
+     "id": 2,
+     "product_id": null,
+     "product_name": "Lenovo ThinkPad | i7",
+     "phone": "+855 11 968 240",
+     "telegram": null,
+     "full_price": 800,
+     "deposit": 0,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "booked",
+     "images": [],
+     "sale_invoice_id": null,
+     "stock_held": false,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": null,
+     "product_track_stock": null,
+     "sale_invoice_number": null,
+     "remaining_balance": 800
+    },
+    {
+     "id": 1,
+     "product_id": 1,
+     "product_name": "MacBook Air 13\" M2",
+     "phone": null,
+     "telegram": "@Horth_Heng",
+     "full_price": 1049,
+     "deposit": 300,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "booked",
+     "images": [],
+     "sale_invoice_id": null,
+     "stock_held": true,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": "https://example.com/z.jpg",
+     "product_track_stock": false,
+     "sale_invoice_number": null,
+     "remaining_balance": 749
+    }
+   ]
+  },
+  {
+   "label": "bookings by status",
+   "method": "GET",
+   "path": "/bookings?status=booked",
+   "status": 200,
+   "body": [
+    {
+     "id": 3,
+     "product_id": 3,
+     "product_name": "Dell Inspiron 15",
+     "phone": null,
+     "telegram": "@Horth_Heng",
+     "full_price": 520,
+     "deposit": 100,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "booked",
+     "images": [],
+     "sale_invoice_id": null,
+     "stock_held": true,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": "https://example.com/d.png",
+     "product_track_stock": true,
+     "sale_invoice_number": null,
+     "remaining_balance": 420
+    },
+    {
+     "id": 2,
+     "product_id": null,
+     "product_name": "Lenovo ThinkPad | i7",
+     "phone": "+855 11 968 240",
+     "telegram": null,
+     "full_price": 800,
+     "deposit": 0,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "booked",
+     "images": [],
+     "sale_invoice_id": null,
+     "stock_held": false,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": null,
+     "product_track_stock": null,
+     "sale_invoice_number": null,
+     "remaining_balance": 800
+    },
+    {
+     "id": 1,
+     "product_id": 1,
+     "product_name": "MacBook Air 13\" M2",
+     "phone": null,
+     "telegram": "@Horth_Heng",
+     "full_price": 1049,
+     "deposit": 300,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "booked",
+     "images": [],
+     "sale_invoice_id": null,
+     "stock_held": true,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": "https://example.com/z.jpg",
+     "product_track_stock": false,
+     "sale_invoice_number": null,
+     "remaining_balance": 749
+    }
+   ]
+  },
+  {
+   "label": "bookings by a wrong status",
+   "method": "GET",
+   "path": "/bookings?status=lost",
+   "status": 400,
+   "body": {
+    "error": "Status must be one of: booked, picked_up, cancelled"
+   }
+  },
+  {
+   "label": "booking by id",
+   "method": "GET",
+   "path": "/bookings/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 1,
+    "product_name": "MacBook Air 13\" M2",
+    "phone": null,
+    "telegram": "@Horth_Heng",
+    "full_price": 1049,
+    "deposit": 300,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "booked",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": true,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/z.jpg",
+    "product_track_stock": false,
+    "sale_invoice_number": null,
+    "remaining_balance": 749
+   }
+  },
+  {
+   "label": "booking missing",
+   "method": "GET",
+   "path": "/bookings/999",
+   "status": 404,
+   "body": {
+    "error": "Booking not found"
+   }
+  },
+  {
+   "label": "update booking phone only",
+   "method": "PUT",
+   "path": "/bookings/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 1,
+    "product_name": "MacBook Air 13\" M2",
+    "phone": "011 968 240",
+    "telegram": "@Horth_Heng",
+    "full_price": 1049,
+    "deposit": 300,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "booked",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": true,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/z.jpg",
+    "product_track_stock": false,
+    "sale_invoice_number": null,
+    "remaining_balance": 749
+   }
+  },
+  {
+   "label": "update booking with a bad price",
+   "method": "PUT",
+   "path": "/bookings/1",
+   "status": 400,
+   "body": {
+    "error": "Deposit cannot be more than the full price"
+   }
+  },
+  {
+   "label": "update missing booking",
+   "method": "PUT",
+   "path": "/bookings/999",
+   "status": 404,
+   "body": {
+    "error": "Booking not found"
+   }
+  },
+  {
+   "label": "cancel the booking of the single Mac",
+   "method": "PUT",
+   "path": "/bookings/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 1,
+    "product_name": "MacBook Air 13\" M2",
+    "phone": "011 968 240",
+    "telegram": "@Horth_Heng",
+    "full_price": 1049,
+    "deposit": 300,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "cancelled",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": false,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/z.jpg",
+    "product_track_stock": false,
+    "sale_invoice_number": null,
+    "remaining_balance": 749
+   }
+  },
+  {
+   "label": "Mac after the cancel (free again)",
+   "method": "GET",
+   "path": "/products/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "sku": "MAC-001",
+    "code": "LP-0001",
+    "name": "MacBook Air 13\" M2 (new)",
+    "category_id": 1,
+    "brand": "Apple",
+    "model": null,
+    "description": "Chip M2\nRam 8GB | Storage 256GB",
+    "selling_price": "1049.00",
+    "extra_prices": [
+     {
+      "label": "16GB / 512GB",
+      "price": 1299
+     }
+    ],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/z.jpg",
+    "images": [
+     "https://example.com/z.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Mac"
+   }
+  },
+  {
+   "label": "book it again after the cancel",
+   "method": "PUT",
+   "path": "/bookings/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 1,
+    "product_name": "MacBook Air 13\" M2",
+    "phone": "011 968 240",
+    "telegram": "@Horth_Heng",
+    "full_price": 1049,
+    "deposit": 300,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "booked",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": true,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/z.jpg",
+    "product_track_stock": false,
+    "sale_invoice_number": null,
+    "remaining_balance": 749
+   }
+  },
+  {
+   "label": "Mac after it was booked again",
+   "method": "GET",
+   "path": "/products/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "sku": "MAC-001",
+    "code": "LP-0001",
+    "name": "MacBook Air 13\" M2 (new)",
+    "category_id": 1,
+    "brand": "Apple",
+    "model": null,
+    "description": "Chip M2\nRam 8GB | Storage 256GB",
+    "selling_price": "1049.00",
+    "extra_prices": [
+     {
+      "label": "16GB / 512GB",
+      "price": 1299
+     }
+    ],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": "booked",
+    "image_url": "https://example.com/z.jpg",
+    "images": [
+     "https://example.com/z.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Mac"
+   }
+  },
+  {
+   "label": "move the booking to another laptop",
+   "method": "PUT",
+   "path": "/bookings/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 4,
+    "product_name": "HP Pavilion",
+    "phone": "011 968 240",
+    "telegram": "@Horth_Heng",
+    "full_price": 1049,
+    "deposit": 300,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "booked",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": true,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": null,
+    "product_track_stock": false,
+    "sale_invoice_number": null,
+    "remaining_balance": 749
+   }
+  },
+  {
+   "label": "both laptops after the move",
+   "method": "GET",
+   "path": "/products?include_archived=true",
+   "status": 200,
+   "body": [
+    {
+     "id": 1,
+     "sku": "MAC-001",
+     "code": "LP-0001",
+     "name": "MacBook Air 13\" M2 (new)",
+     "category_id": 1,
+     "brand": "Apple",
+     "model": null,
+     "description": "Chip M2\nRam 8GB | Storage 256GB",
+     "selling_price": "1049.00",
+     "extra_prices": [
+      {
+       "label": "16GB / 512GB",
+       "price": 1299
+      }
+     ],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": "https://example.com/z.jpg",
+     "images": [
+      "https://example.com/z.jpg"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Mac"
+    },
+    {
+     "id": 2,
+     "sku": "WIN-ASU-001",
+     "code": "LP-0002",
+     "name": "Asus TUF A15",
+     "category_id": 2,
+     "brand": "Dell",
+     "model": null,
+     "description": "Ryzen 7",
+     "selling_price": "749.50",
+     "extra_prices": [],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    },
+    {
+     "id": 3,
+     "sku": "WIN-DEL-001",
+     "code": "LP-0003",
+     "name": "Dell Inspiron 15",
+     "category_id": 2,
+     "brand": "Dell",
+     "model": null,
+     "description": null,
+     "selling_price": "520.00",
+     "extra_prices": [],
+     "track_stock": 1,
+     "stock_quantity": 2,
+     "min_stock_level": 1,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": "https://example.com/d.png",
+     "images": [
+      "https://example.com/d.png"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    },
+    {
+     "id": 4,
+     "sku": "MY-SKU-1",
+     "code": "LP-0004",
+     "name": "HP Pavilion",
+     "category_id": 2,
+     "brand": "HP",
+     "model": null,
+     "description": null,
+     "selling_price": "650.00",
+     "extra_prices": [],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": "booked",
+     "image_url": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    }
+   ]
+  },
+  {
+   "label": "move it back",
+   "method": "PUT",
+   "path": "/bookings/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 1,
+    "product_name": "MacBook Air 13\" M2",
+    "phone": "011 968 240",
+    "telegram": "@Horth_Heng",
+    "full_price": 1049,
+    "deposit": 300,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "booked",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": true,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/z.jpg",
+    "product_track_stock": false,
+    "sale_invoice_number": null,
+    "remaining_balance": 749
+   }
+  },
+  {
+   "label": "pickup with a wrong warranty",
+   "method": "POST",
+   "path": "/bookings/1/pickup",
+   "status": 400,
+   "body": {
+    "error": "Warranty must be 1 week, 2 weeks, 1 month or none"
+   }
+  },
+  {
+   "label": "pickup with a long customer name",
+   "method": "POST",
+   "path": "/bookings/1/pickup",
+   "status": 400,
+   "body": {
+    "error": "Customer name is too long (max 100 characters)"
+   }
+  },
+  {
+   "label": "pickup",
+   "method": "POST",
+   "path": "/bookings/1/pickup",
+   "status": 201,
+   "body": {
+    "booking": {
+     "id": 1,
+     "product_id": 1,
+     "product_name": "MacBook Air 13\" M2",
+     "phone": "011 968 240",
+     "telegram": "@Horth_Heng",
+     "full_price": 1049,
+     "deposit": 300,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "picked_up",
+     "images": [],
+     "sale_invoice_id": 1,
+     "stock_held": false,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": "https://example.com/z.jpg",
+     "product_track_stock": false,
+     "sale_invoice_number": 41,
+     "remaining_balance": 749
+    },
+    "invoice": {
+     "id": 1,
+     "number": 41,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": "Horth Heng",
+     "phone": "011 968 240",
+     "telegram": "@Horth_Heng",
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "1_month",
+     "items": [
+      {
+       "qty": 1,
+       "name": "MacBook Air 13\" M2",
+       "unit_price": 1049
+      }
+     ],
+     "total": 1049,
+     "deposit": 1049,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000041"
+    },
+    "laptop": "hidden"
+   }
+  },
+  {
+   "label": "Mac after the pickup (sold)",
+   "method": "GET",
+   "path": "/products/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "sku": "MAC-001",
+    "code": "LP-0001",
+    "name": "MacBook Air 13\" M2 (new)",
+    "category_id": 1,
+    "brand": "Apple",
+    "model": null,
+    "description": "Chip M2\nRam 8GB | Storage 256GB",
+    "selling_price": "1049.00",
+    "extra_prices": [
+     {
+      "label": "16GB / 512GB",
+      "price": 1299
+     }
+    ],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 1,
+    "hold_status": null,
+    "image_url": "https://example.com/z.jpg",
+    "images": [
+     "https://example.com/z.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Mac"
+   }
+  },
+  {
+   "label": "pickup again",
+   "method": "POST",
+   "path": "/bookings/1/pickup",
+   "status": 409,
+   "body": {
+    "error": "This booking is already picked up"
+   }
+  },
+  {
+   "label": "picked-up booking by id",
+   "method": "GET",
+   "path": "/bookings/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 1,
+    "product_name": "MacBook Air 13\" M2",
+    "phone": "011 968 240",
+    "telegram": "@Horth_Heng",
+    "full_price": 1049,
+    "deposit": 300,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "picked_up",
+    "images": [],
+    "sale_invoice_id": 1,
+    "stock_held": false,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/z.jpg",
+    "product_track_stock": false,
+    "sale_invoice_number": 41,
+    "remaining_balance": 749
+   }
+  },
+  {
+   "label": "update a picked-up booking",
+   "method": "PUT",
+   "path": "/bookings/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 1,
+    "product_name": "MacBook Air 13\" M2",
+    "phone": "011 000 111",
+    "telegram": "@Horth_Heng",
+    "full_price": 1049,
+    "deposit": 300,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "picked_up",
+    "images": [],
+    "sale_invoice_id": 1,
+    "stock_held": false,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/z.jpg",
+    "product_track_stock": false,
+    "sale_invoice_number": 41,
+    "remaining_balance": 749
+   }
+  },
+  {
+   "label": "pickup of missing booking",
+   "method": "POST",
+   "path": "/bookings/999/pickup",
+   "status": 404,
+   "body": {
+    "error": "Booking not found"
+   }
+  },
+  {
+   "label": "pickup of the hand-typed booking (phone from the booking)",
+   "method": "POST",
+   "path": "/bookings/2/pickup",
+   "status": 201,
+   "body": {
+    "booking": {
+     "id": 2,
+     "product_id": null,
+     "product_name": "Lenovo ThinkPad | i7",
+     "phone": "+855 11 968 240",
+     "telegram": null,
+     "full_price": 800,
+     "deposit": 0,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "picked_up",
+     "images": [],
+     "sale_invoice_id": 2,
+     "stock_held": false,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": null,
+     "product_track_stock": null,
+     "sale_invoice_number": 42,
+     "remaining_balance": 800
+    },
+    "invoice": {
+     "id": 2,
+     "number": 42,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": null,
+     "phone": "+855 11 968 240",
+     "telegram": null,
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "none",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Lenovo ThinkPad | i7",
+       "unit_price": 800
+      }
+     ],
+     "total": 800,
+     "deposit": 800,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000042"
+    },
+    "laptop": "none"
+   }
+  },
+  {
+   "label": "pickup of the counted stock",
+   "method": "POST",
+   "path": "/bookings/3/pickup",
+   "status": 201,
+   "body": {
+    "booking": {
+     "id": 3,
+     "product_id": 3,
+     "product_name": "Dell Inspiron 15",
+     "phone": null,
+     "telegram": "@Horth_Heng",
+     "full_price": 520,
+     "deposit": 100,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "picked_up",
+     "images": [],
+     "sale_invoice_id": 3,
+     "stock_held": false,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": "https://example.com/d.png",
+     "product_track_stock": true,
+     "sale_invoice_number": 43,
+     "remaining_balance": 420
+    },
+    "invoice": {
+     "id": 3,
+     "number": 43,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": null,
+     "phone": null,
+     "telegram": "@someone",
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "2_weeks",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Dell Inspiron 15",
+       "unit_price": 520
+      }
+     ],
+     "total": 520,
+     "deposit": 520,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000043"
+    },
+    "laptop": "stock_kept"
+   }
+  },
+  {
+   "label": "counted stock after its pickup (stays one less)",
+   "method": "GET",
+   "path": "/products/3",
+   "status": 200,
+   "body": {
+    "id": 3,
+    "sku": "WIN-DEL-001",
+    "code": "LP-0003",
+    "name": "Dell Inspiron 15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": null,
+    "selling_price": "520.00",
+    "extra_prices": [],
+    "track_stock": 1,
+    "stock_quantity": 2,
+    "min_stock_level": 1,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/d.png",
+    "images": [
+     "https://example.com/d.png"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "book counted stock again",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 201,
+   "body": {
+    "id": 4,
+    "product_id": 3,
+    "product_name": "Dell Inspiron 15",
+    "phone": null,
+    "telegram": "@Horth_Heng",
+    "full_price": 520,
+    "deposit": 0,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "booked",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": true,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/d.png",
+    "product_track_stock": true,
+    "sale_invoice_number": null,
+    "remaining_balance": 520
+   }
+  },
+  {
+   "label": "delete that booking (stock comes back)",
+   "method": "DELETE",
+   "path": "/bookings/4",
+   "status": 200,
+   "body": {
+    "message": "Booking deleted successfully"
+   }
+  },
+  {
+   "label": "counted stock after the delete",
+   "method": "GET",
+   "path": "/products/3",
+   "status": 200,
+   "body": {
+    "id": 3,
+    "sku": "WIN-DEL-001",
+    "code": "LP-0003",
+    "name": "Dell Inspiron 15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": null,
+    "selling_price": "520.00",
+    "extra_prices": [],
+    "track_stock": 1,
+    "stock_quantity": 2,
+    "min_stock_level": 1,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/d.png",
+    "images": [
+     "https://example.com/d.png"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "delete missing booking",
+   "method": "DELETE",
+   "path": "/bookings/999",
+   "status": 404,
+   "body": {
+    "error": "Booking not found"
+   }
+  },
+  {
+   "label": "bookings",
+   "method": "GET",
+   "path": "/bookings",
+   "status": 200,
+   "body": [
+    {
+     "id": 3,
+     "product_id": 3,
+     "product_name": "Dell Inspiron 15",
+     "phone": null,
+     "telegram": "@Horth_Heng",
+     "full_price": 520,
+     "deposit": 100,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "picked_up",
+     "images": [],
+     "sale_invoice_id": 3,
+     "stock_held": false,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": "https://example.com/d.png",
+     "product_track_stock": true,
+     "sale_invoice_number": 43,
+     "remaining_balance": 420
+    },
+    {
+     "id": 2,
+     "product_id": null,
+     "product_name": "Lenovo ThinkPad | i7",
+     "phone": "+855 11 968 240",
+     "telegram": null,
+     "full_price": 800,
+     "deposit": 0,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "picked_up",
+     "images": [],
+     "sale_invoice_id": 2,
+     "stock_held": false,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": null,
+     "product_track_stock": null,
+     "sale_invoice_number": 42,
+     "remaining_balance": 800
+    },
+    {
+     "id": 1,
+     "product_id": 1,
+     "product_name": "MacBook Air 13\" M2",
+     "phone": "011 000 111",
+     "telegram": "@Horth_Heng",
+     "full_price": 1049,
+     "deposit": 300,
+     "booking_date": "2026-11-10",
+     "pickup_date": "2026-11-20",
+     "status": "picked_up",
+     "images": [],
+     "sale_invoice_id": 1,
+     "stock_held": false,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_image": "https://example.com/z.jpg",
+     "product_track_stock": false,
+     "sale_invoice_number": 41,
+     "remaining_balance": 749
+    }
+   ]
+  },
+  {
+   "label": "repair the shop laptop",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 201,
+   "body": {
+    "id": 1,
+    "product_id": 2,
+    "device": "Asus TUF A15",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Screen flickers",
+    "received_date": "2026-11-11",
+    "back_on": "2026-11-15",
+    "cost": 45,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "sale_invoice_number": null,
+    "sale_date": null,
+    "sale_warranty": null,
+    "stock_held": true,
+    "product_track_stock": false,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "laptop after the repair started",
+   "method": "GET",
+   "path": "/products/2",
+   "status": 200,
+   "body": {
+    "id": 2,
+    "sku": "WIN-ASU-001",
+    "code": "LP-0002",
+    "name": "Asus TUF A15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": "Ryzen 7",
+    "selling_price": "749.50",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": "repair",
+    "image_url": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "book a laptop that is in repair",
+   "method": "POST",
+   "path": "/bookings",
+   "status": 409,
+   "body": {
+    "error": "This laptop is in repair"
+   }
+  },
+  {
+   "label": "repair of a laptop already in repair",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 201,
+   "body": {
+    "id": 2,
+    "product_id": 2,
+    "device": "Asus TUF A15",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Screen flickers",
+    "received_date": "2026-11-11",
+    "back_on": null,
+    "cost": null,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "sale_invoice_number": null,
+    "sale_date": null,
+    "sale_warranty": null,
+    "stock_held": false,
+    "product_track_stock": false,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "repair a customer laptop",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 201,
+   "body": {
+    "id": 3,
+    "product_id": null,
+    "device": "Lenovo IdeaPad",
+    "customer_name": "Vanna Chea",
+    "phone": "099 111 222",
+    "telegram": null,
+    "problem": "No power",
+    "received_date": "<today>",
+    "back_on": null,
+    "cost": null,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "sale_invoice_number": null,
+    "sale_date": null,
+    "sale_warranty": null,
+    "stock_held": false,
+    "product_track_stock": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "repair without a device",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 400,
+   "body": {
+    "error": "Laptop or device is required"
+   }
+  },
+  {
+   "label": "repair without a problem",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 400,
+   "body": {
+    "error": "Please write what is wrong"
+   }
+  },
+  {
+   "label": "repair with a wrong status",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 400,
+   "body": {
+    "error": "Status must be one of: received, fixed, picked_up"
+   }
+  },
+  {
+   "label": "repair with back-on before received",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 400,
+   "body": {
+    "error": "The back-on date cannot be before the received date"
+   }
+  },
+  {
+   "label": "repair with a bad cost",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 400,
+   "body": {
+    "error": "Cost must be a number of 0 or more"
+   }
+  },
+  {
+   "label": "repair of a missing product",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 400,
+   "body": {
+    "error": "That product no longer exists"
+   }
+  },
+  {
+   "label": "repair with a missing sale",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 400,
+   "body": {
+    "error": "That sale no longer exists"
+   }
+  },
+  {
+   "label": "repairs",
+   "method": "GET",
+   "path": "/repairs",
+   "status": 200,
+   "body": [
+    {
+     "id": 2,
+     "product_id": 2,
+     "device": "Asus TUF A15",
+     "customer_name": null,
+     "phone": null,
+     "telegram": null,
+     "problem": "Screen flickers",
+     "received_date": "2026-11-11",
+     "back_on": null,
+     "cost": null,
+     "status": "received",
+     "fixed_date": null,
+     "picked_up_date": null,
+     "sale_invoice_id": null,
+     "sale_invoice_number": null,
+     "sale_date": null,
+     "sale_warranty": null,
+     "stock_held": false,
+     "product_track_stock": false,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    },
+    {
+     "id": 1,
+     "product_id": 2,
+     "device": "Asus TUF A15",
+     "customer_name": null,
+     "phone": null,
+     "telegram": null,
+     "problem": "Screen flickers",
+     "received_date": "2026-11-11",
+     "back_on": "2026-11-15",
+     "cost": 45,
+     "status": "received",
+     "fixed_date": null,
+     "picked_up_date": null,
+     "sale_invoice_id": null,
+     "sale_invoice_number": null,
+     "sale_date": null,
+     "sale_warranty": null,
+     "stock_held": true,
+     "product_track_stock": false,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    },
+    {
+     "id": 3,
+     "product_id": null,
+     "device": "Lenovo IdeaPad",
+     "customer_name": "Vanna Chea",
+     "phone": "099 111 222",
+     "telegram": null,
+     "problem": "No power",
+     "received_date": "<today>",
+     "back_on": null,
+     "cost": null,
+     "status": "received",
+     "fixed_date": null,
+     "picked_up_date": null,
+     "sale_invoice_id": null,
+     "sale_invoice_number": null,
+     "sale_date": null,
+     "sale_warranty": null,
+     "stock_held": false,
+     "product_track_stock": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    }
+   ]
+  },
+  {
+   "label": "repairs by status",
+   "method": "GET",
+   "path": "/repairs?status=received",
+   "status": 200,
+   "body": [
+    {
+     "id": 2,
+     "product_id": 2,
+     "device": "Asus TUF A15",
+     "customer_name": null,
+     "phone": null,
+     "telegram": null,
+     "problem": "Screen flickers",
+     "received_date": "2026-11-11",
+     "back_on": null,
+     "cost": null,
+     "status": "received",
+     "fixed_date": null,
+     "picked_up_date": null,
+     "sale_invoice_id": null,
+     "sale_invoice_number": null,
+     "sale_date": null,
+     "sale_warranty": null,
+     "stock_held": false,
+     "product_track_stock": false,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    },
+    {
+     "id": 1,
+     "product_id": 2,
+     "device": "Asus TUF A15",
+     "customer_name": null,
+     "phone": null,
+     "telegram": null,
+     "problem": "Screen flickers",
+     "received_date": "2026-11-11",
+     "back_on": "2026-11-15",
+     "cost": 45,
+     "status": "received",
+     "fixed_date": null,
+     "picked_up_date": null,
+     "sale_invoice_id": null,
+     "sale_invoice_number": null,
+     "sale_date": null,
+     "sale_warranty": null,
+     "stock_held": true,
+     "product_track_stock": false,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    },
+    {
+     "id": 3,
+     "product_id": null,
+     "device": "Lenovo IdeaPad",
+     "customer_name": "Vanna Chea",
+     "phone": "099 111 222",
+     "telegram": null,
+     "problem": "No power",
+     "received_date": "<today>",
+     "back_on": null,
+     "cost": null,
+     "status": "received",
+     "fixed_date": null,
+     "picked_up_date": null,
+     "sale_invoice_id": null,
+     "sale_invoice_number": null,
+     "sale_date": null,
+     "sale_warranty": null,
+     "stock_held": false,
+     "product_track_stock": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    }
+   ]
+  },
+  {
+   "label": "repairs by a wrong status",
+   "method": "GET",
+   "path": "/repairs?status=lost",
+   "status": 400,
+   "body": {
+    "error": "Status must be one of: received, fixed, picked_up"
+   }
+  },
+  {
+   "label": "repair by id",
+   "method": "GET",
+   "path": "/repairs/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 2,
+    "device": "Asus TUF A15",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Screen flickers",
+    "received_date": "2026-11-11",
+    "back_on": "2026-11-15",
+    "cost": 45,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "sale_invoice_number": null,
+    "sale_date": null,
+    "sale_warranty": null,
+    "stock_held": true,
+    "product_track_stock": false,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "repair missing",
+   "method": "GET",
+   "path": "/repairs/999",
+   "status": 404,
+   "body": {
+    "error": "Repair not found"
+   }
+  },
+  {
+   "label": "repair fixed",
+   "method": "PUT",
+   "path": "/repairs/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 2,
+    "device": "Asus TUF A15",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Screen flickers",
+    "received_date": "2026-11-11",
+    "back_on": "2026-11-15",
+    "cost": 45,
+    "status": "fixed",
+    "fixed_date": "<today>",
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "sale_invoice_number": null,
+    "sale_date": null,
+    "sale_warranty": null,
+    "stock_held": false,
+    "product_track_stock": false,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "laptop after the repair was fixed",
+   "method": "GET",
+   "path": "/products/2",
+   "status": 200,
+   "body": {
+    "id": 2,
+    "sku": "WIN-ASU-001",
+    "code": "LP-0002",
+    "name": "Asus TUF A15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": "Ryzen 7",
+    "selling_price": "749.50",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "repair back to received",
+   "method": "PUT",
+   "path": "/repairs/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 2,
+    "device": "Asus TUF A15",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Screen flickers",
+    "received_date": "2026-11-11",
+    "back_on": "2026-11-15",
+    "cost": 45,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "sale_invoice_number": null,
+    "sale_date": null,
+    "sale_warranty": null,
+    "stock_held": true,
+    "product_track_stock": false,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "laptop in repair again",
+   "method": "GET",
+   "path": "/products/2",
+   "status": 200,
+   "body": {
+    "id": 2,
+    "sku": "WIN-ASU-001",
+    "code": "LP-0002",
+    "name": "Asus TUF A15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": "Ryzen 7",
+    "selling_price": "749.50",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": "repair",
+    "image_url": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "repair picked up",
+   "method": "PUT",
+   "path": "/repairs/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 2,
+    "device": "Asus TUF A15",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Screen flickers",
+    "received_date": "2026-11-11",
+    "back_on": "2026-11-15",
+    "cost": 60,
+    "status": "picked_up",
+    "fixed_date": "<today>",
+    "picked_up_date": "<today>",
+    "sale_invoice_id": null,
+    "sale_invoice_number": null,
+    "sale_date": null,
+    "sale_warranty": null,
+    "stock_held": false,
+    "product_track_stock": false,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "laptop after the pickup",
+   "method": "GET",
+   "path": "/products/2",
+   "status": 200,
+   "body": {
+    "id": 2,
+    "sku": "WIN-ASU-001",
+    "code": "LP-0002",
+    "name": "Asus TUF A15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": "Ryzen 7",
+    "selling_price": "749.50",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "update repair problem",
+   "method": "PUT",
+   "path": "/repairs/3",
+   "status": 200,
+   "body": {
+    "id": 3,
+    "product_id": null,
+    "device": "Lenovo IdeaPad",
+    "customer_name": "Vanna Chea",
+    "phone": "099 111 222",
+    "telegram": null,
+    "problem": "No power, no charge light",
+    "received_date": "<today>",
+    "back_on": "2026-11-25",
+    "cost": null,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "sale_invoice_number": null,
+    "sale_date": null,
+    "sale_warranty": null,
+    "stock_held": false,
+    "product_track_stock": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "update missing repair",
+   "method": "PUT",
+   "path": "/repairs/999",
+   "status": 404,
+   "body": {
+    "error": "Repair not found"
+   }
+  },
+  {
+   "label": "repair of a laptop whose sale exists",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 201,
+   "body": {
+    "id": 4,
+    "product_id": null,
+    "device": "MacBook Air",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Battery",
+    "received_date": "2026-11-12",
+    "back_on": null,
+    "cost": null,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": 1,
+    "sale_invoice_number": 41,
+    "sale_date": "<today>",
+    "sale_warranty": "1_month",
+    "stock_held": false,
+    "product_track_stock": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "repair without a date (today is used)",
+   "method": "POST",
+   "path": "/repairs",
+   "status": 201,
+   "body": {
+    "id": 5,
+    "product_id": null,
+    "device": "Acer Aspire",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Slow",
+    "received_date": "<today>",
+    "back_on": null,
+    "cost": null,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "sale_invoice_number": null,
+    "sale_date": null,
+    "sale_warranty": null,
+    "stock_held": false,
+    "product_track_stock": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "repairs",
+   "method": "GET",
+   "path": "/repairs",
+   "status": 200,
+   "body": [
+    {
+     "id": 2,
+     "product_id": 2,
+     "device": "Asus TUF A15",
+     "customer_name": null,
+     "phone": null,
+     "telegram": null,
+     "problem": "Screen flickers",
+     "received_date": "2026-11-11",
+     "back_on": null,
+     "cost": null,
+     "status": "received",
+     "fixed_date": null,
+     "picked_up_date": null,
+     "sale_invoice_id": null,
+     "sale_invoice_number": null,
+     "sale_date": null,
+     "sale_warranty": null,
+     "stock_held": false,
+     "product_track_stock": false,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    },
+    {
+     "id": 4,
+     "product_id": null,
+     "device": "MacBook Air",
+     "customer_name": null,
+     "phone": null,
+     "telegram": null,
+     "problem": "Battery",
+     "received_date": "2026-11-12",
+     "back_on": null,
+     "cost": null,
+     "status": "received",
+     "fixed_date": null,
+     "picked_up_date": null,
+     "sale_invoice_id": 1,
+     "sale_invoice_number": 41,
+     "sale_date": "<today>",
+     "sale_warranty": "1_month",
+     "stock_held": false,
+     "product_track_stock": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    },
+    {
+     "id": 5,
+     "product_id": null,
+     "device": "Acer Aspire",
+     "customer_name": null,
+     "phone": null,
+     "telegram": null,
+     "problem": "Slow",
+     "received_date": "<today>",
+     "back_on": null,
+     "cost": null,
+     "status": "received",
+     "fixed_date": null,
+     "picked_up_date": null,
+     "sale_invoice_id": null,
+     "sale_invoice_number": null,
+     "sale_date": null,
+     "sale_warranty": null,
+     "stock_held": false,
+     "product_track_stock": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    },
+    {
+     "id": 3,
+     "product_id": null,
+     "device": "Lenovo IdeaPad",
+     "customer_name": "Vanna Chea",
+     "phone": "099 111 222",
+     "telegram": null,
+     "problem": "No power, no charge light",
+     "received_date": "<today>",
+     "back_on": "2026-11-25",
+     "cost": null,
+     "status": "received",
+     "fixed_date": null,
+     "picked_up_date": null,
+     "sale_invoice_id": null,
+     "sale_invoice_number": null,
+     "sale_date": null,
+     "sale_warranty": null,
+     "stock_held": false,
+     "product_track_stock": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    },
+    {
+     "id": 1,
+     "product_id": 2,
+     "device": "Asus TUF A15",
+     "customer_name": null,
+     "phone": null,
+     "telegram": null,
+     "problem": "Screen flickers",
+     "received_date": "2026-11-11",
+     "back_on": "2026-11-15",
+     "cost": 60,
+     "status": "picked_up",
+     "fixed_date": "<today>",
+     "picked_up_date": "<today>",
+     "sale_invoice_id": null,
+     "sale_invoice_number": null,
+     "sale_date": null,
+     "sale_warranty": null,
+     "stock_held": false,
+     "product_track_stock": false,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>"
+    }
+   ]
+  },
+  {
+   "label": "delete a repair that holds a laptop",
+   "method": "DELETE",
+   "path": "/repairs/3",
+   "status": 200,
+   "body": {
+    "message": "Repair deleted successfully"
+   }
+  },
+  {
+   "label": "delete missing repair",
+   "method": "DELETE",
+   "path": "/repairs/999",
+   "status": 404,
+   "body": {
+    "error": "Repair not found"
+   }
+  },
+  {
+   "label": "next invoice number",
+   "method": "GET",
+   "path": "/invoices/next-number",
+   "status": 200,
+   "body": {
+    "number": 44
+   }
+  },
+  {
+   "label": "invoices (made by the pickups)",
+   "method": "GET",
+   "path": "/invoices",
+   "status": 200,
+   "body": [
+    {
+     "id": 3,
+     "number": 43,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": null,
+     "phone": null,
+     "telegram": "@someone",
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "2_weeks",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Dell Inspiron 15",
+       "unit_price": 520
+      }
+     ],
+     "total": 520,
+     "deposit": 520,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000043"
+    },
+    {
+     "id": 2,
+     "number": 42,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": null,
+     "phone": "+855 11 968 240",
+     "telegram": null,
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "none",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Lenovo ThinkPad | i7",
+       "unit_price": 800
+      }
+     ],
+     "total": 800,
+     "deposit": 800,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000042"
+    },
+    {
+     "id": 1,
+     "number": 41,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": "Horth Heng",
+     "phone": "011 968 240",
+     "telegram": "@Horth_Heng",
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "1_month",
+     "items": [
+      {
+       "qty": 1,
+       "name": "MacBook Air 13\" M2",
+       "unit_price": 1049
+      }
+     ],
+     "total": 1049,
+     "deposit": 1049,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000041"
+    }
+   ]
+  },
+  {
+   "label": "invoices of type sale",
+   "method": "GET",
+   "path": "/invoices?type=sale",
+   "status": 200,
+   "body": [
+    {
+     "id": 3,
+     "number": 43,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": null,
+     "phone": null,
+     "telegram": "@someone",
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "2_weeks",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Dell Inspiron 15",
+       "unit_price": 520
+      }
+     ],
+     "total": 520,
+     "deposit": 520,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000043"
+    },
+    {
+     "id": 2,
+     "number": 42,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": null,
+     "phone": "+855 11 968 240",
+     "telegram": null,
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "none",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Lenovo ThinkPad | i7",
+       "unit_price": 800
+      }
+     ],
+     "total": 800,
+     "deposit": 800,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000042"
+    },
+    {
+     "id": 1,
+     "number": 41,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": "Horth Heng",
+     "phone": "011 968 240",
+     "telegram": "@Horth_Heng",
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "1_month",
+     "items": [
+      {
+       "qty": 1,
+       "name": "MacBook Air 13\" M2",
+       "unit_price": 1049
+      }
+     ],
+     "total": 1049,
+     "deposit": 1049,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000041"
+    }
+   ]
+  },
+  {
+   "label": "invoices of a wrong type",
+   "method": "GET",
+   "path": "/invoices?type=gift",
+   "status": 400,
+   "body": {
+    "error": "Type must be sale, booking or repair"
+   }
+  },
+  {
+   "label": "create a sale",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 201,
+   "body": {
+    "id": 4,
+    "number": 44,
+    "type": "sale",
+    "invoice_date": "<today>",
+    "customer_name": "Sok Lea",
+    "phone": null,
+    "telegram": "@soklea",
+    "device": null,
+    "problem": null,
+    "pickup_date": null,
+    "booking_id": null,
+    "repair_id": null,
+    "warranty": "1_week",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Asus TUF A15",
+      "unit_price": 749.5
+     }
+    ],
+    "total": 749.5,
+    "deposit": 749.5,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "balance": 0,
+    "number_text": "000044"
+   }
+  },
+  {
+   "label": "create a sale with its own number",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 201,
+   "body": {
+    "id": 5,
+    "number": 100,
+    "type": "sale",
+    "invoice_date": "2026-11-12",
+    "customer_name": null,
+    "phone": "012 345 678",
+    "telegram": null,
+    "device": null,
+    "problem": null,
+    "pickup_date": null,
+    "booking_id": null,
+    "repair_id": null,
+    "warranty": "none",
+    "items": [
+     {
+      "qty": 2,
+      "name": "Charger",
+      "unit_price": 15
+     }
+    ],
+    "total": 30,
+    "deposit": 0,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "balance": 30,
+    "number_text": "000100"
+   }
+  },
+  {
+   "label": "create a sale with a number that is used",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 409,
+   "body": {
+    "error": "Invoice number 000100 is already used"
+   }
+  },
+  {
+   "label": "create a booking invoice",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 201,
+   "body": {
+    "id": 7,
+    "number": 101,
+    "type": "booking",
+    "invoice_date": "<today>",
+    "customer_name": "Booker",
+    "phone": "011 111 111",
+    "telegram": null,
+    "device": null,
+    "problem": null,
+    "pickup_date": "2026-11-30",
+    "booking_id": null,
+    "repair_id": null,
+    "warranty": "none",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Dell Inspiron 15",
+      "unit_price": 520
+     }
+    ],
+    "total": 520,
+    "deposit": 100,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "balance": 420,
+    "number_text": "000101"
+   }
+  },
+  {
+   "label": "booking invoice for a booking that has one (via a booking that exists)",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 201,
+   "body": {
+    "id": 8,
+    "number": 102,
+    "type": "booking",
+    "invoice_date": "<today>",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "device": null,
+    "problem": null,
+    "pickup_date": "2026-11-30",
+    "booking_id": 2,
+    "repair_id": null,
+    "warranty": "none",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Lenovo",
+      "unit_price": 800
+     }
+    ],
+    "total": 800,
+    "deposit": 0,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "balance": 800,
+    "number_text": "000102"
+   }
+  },
+  {
+   "label": "second invoice for that booking",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 409,
+   "body": {
+    "error": "This booking already has an invoice"
+   }
+  },
+  {
+   "label": "booking invoice with pickup before the date",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Pickup date cannot be before the invoice date"
+   }
+  },
+  {
+   "label": "booking invoice without a pickup date",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Pickup date must be a real date"
+   }
+  },
+  {
+   "label": "booking invoice for a missing booking",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "That booking no longer exists"
+   }
+  },
+  {
+   "label": "create a repair invoice",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 201,
+   "body": {
+    "id": 10,
+    "number": 103,
+    "type": "repair",
+    "invoice_date": "<today>",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "device": "Lenovo IdeaPad",
+    "problem": "No power",
+    "pickup_date": null,
+    "booking_id": null,
+    "repair_id": 4,
+    "warranty": "none",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Labour",
+      "unit_price": 25
+     }
+    ],
+    "total": 25,
+    "deposit": 0,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "balance": 25,
+    "number_text": "000103"
+   }
+  },
+  {
+   "label": "second invoice for that repair",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 409,
+   "body": {
+    "error": "This repair already has an invoice"
+   }
+  },
+  {
+   "label": "repair invoice without a device",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Device is required"
+   }
+  },
+  {
+   "label": "repair invoice for a missing repair",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "That repair no longer exists"
+   }
+  },
+  {
+   "label": "invoice without a type",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Type must be sale, booking or repair"
+   }
+  },
+  {
+   "label": "invoice with a wrong type",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Type must be sale, booking or repair"
+   }
+  },
+  {
+   "label": "invoice without items",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Add at least one item"
+   }
+  },
+  {
+   "label": "invoice with items that are not a list",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Add at least one item"
+   }
+  },
+  {
+   "label": "invoice with too many items",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "A booking invoice has room for 5 items"
+   }
+  },
+  {
+   "label": "invoice with an item without a name",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Item 1: please write the name"
+   }
+  },
+  {
+   "label": "invoice with a bad quantity",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Item 1: quantity must be a whole number from 1 to 999"
+   }
+  },
+  {
+   "label": "invoice with a bad price",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Item 1: price must be a number of 0 or more"
+   }
+  },
+  {
+   "label": "invoice with a total of 0",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "The total must be more than 0"
+   }
+  },
+  {
+   "label": "invoice with a deposit above the total",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Deposit cannot be more than the total"
+   }
+  },
+  {
+   "label": "invoice with a wrong warranty",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Warranty must be 1 week, 2 weeks, 1 month or none"
+   }
+  },
+  {
+   "label": "invoice with a wrong date",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Date must be a real date"
+   }
+  },
+  {
+   "label": "invoice with a wrong number",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Invoice number must be a whole number from 1 to 999999"
+   }
+  },
+  {
+   "label": "invoice with a name that is too long",
+   "method": "POST",
+   "path": "/invoices",
+   "status": 400,
+   "body": {
+    "error": "Item 1: the name is too long (max 90 characters)"
+   }
+  },
+  {
+   "label": "invoice by id",
+   "method": "GET",
+   "path": "/invoices/4",
+   "status": 200,
+   "body": {
+    "id": 4,
+    "number": 44,
+    "type": "sale",
+    "invoice_date": "<today>",
+    "customer_name": "Sok Lea",
+    "phone": null,
+    "telegram": "@soklea",
+    "device": null,
+    "problem": null,
+    "pickup_date": null,
+    "booking_id": null,
+    "repair_id": null,
+    "warranty": "1_week",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Asus TUF A15",
+      "unit_price": 749.5
+     }
+    ],
+    "total": 749.5,
+    "deposit": 749.5,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "balance": 0,
+    "number_text": "000044"
+   }
+  },
+  {
+   "label": "invoice missing",
+   "method": "GET",
+   "path": "/invoices/999",
+   "status": 404,
+   "body": {
+    "error": "Invoice not found"
+   }
+  },
+  {
+   "label": "invoices",
+   "method": "GET",
+   "path": "/invoices",
+   "status": 200,
+   "body": [
+    {
+     "id": 10,
+     "number": 103,
+     "type": "repair",
+     "invoice_date": "<today>",
+     "customer_name": null,
+     "phone": null,
+     "telegram": null,
+     "device": "Lenovo IdeaPad",
+     "problem": "No power",
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": 4,
+     "warranty": "none",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Labour",
+       "unit_price": 25
+      }
+     ],
+     "total": 25,
+     "deposit": 0,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 25,
+     "number_text": "000103"
+    },
+    {
+     "id": 8,
+     "number": 102,
+     "type": "booking",
+     "invoice_date": "<today>",
+     "customer_name": null,
+     "phone": null,
+     "telegram": null,
+     "device": null,
+     "problem": null,
+     "pickup_date": "2026-11-30",
+     "booking_id": 2,
+     "repair_id": null,
+     "warranty": "none",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Lenovo",
+       "unit_price": 800
+      }
+     ],
+     "total": 800,
+     "deposit": 0,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 800,
+     "number_text": "000102"
+    },
+    {
+     "id": 7,
+     "number": 101,
+     "type": "booking",
+     "invoice_date": "<today>",
+     "customer_name": "Booker",
+     "phone": "011 111 111",
+     "telegram": null,
+     "device": null,
+     "problem": null,
+     "pickup_date": "2026-11-30",
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "none",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Dell Inspiron 15",
+       "unit_price": 520
+      }
+     ],
+     "total": 520,
+     "deposit": 100,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 420,
+     "number_text": "000101"
+    },
+    {
+     "id": 5,
+     "number": 100,
+     "type": "sale",
+     "invoice_date": "2026-11-12",
+     "customer_name": null,
+     "phone": "012 345 678",
+     "telegram": null,
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "none",
+     "items": [
+      {
+       "qty": 2,
+       "name": "Charger",
+       "unit_price": 15
+      }
+     ],
+     "total": 30,
+     "deposit": 0,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 30,
+     "number_text": "000100"
+    },
+    {
+     "id": 4,
+     "number": 44,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": "Sok Lea",
+     "phone": null,
+     "telegram": "@soklea",
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "1_week",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Asus TUF A15",
+       "unit_price": 749.5
+      }
+     ],
+     "total": 749.5,
+     "deposit": 749.5,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000044"
+    },
+    {
+     "id": 3,
+     "number": 43,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": null,
+     "phone": null,
+     "telegram": "@someone",
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "2_weeks",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Dell Inspiron 15",
+       "unit_price": 520
+      }
+     ],
+     "total": 520,
+     "deposit": 520,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000043"
+    },
+    {
+     "id": 2,
+     "number": 42,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": null,
+     "phone": "+855 11 968 240",
+     "telegram": null,
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "none",
+     "items": [
+      {
+       "qty": 1,
+       "name": "Lenovo ThinkPad | i7",
+       "unit_price": 800
+      }
+     ],
+     "total": 800,
+     "deposit": 800,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000042"
+    },
+    {
+     "id": 1,
+     "number": 41,
+     "type": "sale",
+     "invoice_date": "<today>",
+     "customer_name": "Horth Heng",
+     "phone": "011 968 240",
+     "telegram": "@Horth_Heng",
+     "device": null,
+     "problem": null,
+     "pickup_date": null,
+     "booking_id": null,
+     "repair_id": null,
+     "warranty": "1_month",
+     "items": [
+      {
+       "qty": 1,
+       "name": "MacBook Air 13\" M2",
+       "unit_price": 1049
+      }
+     ],
+     "total": 1049,
+     "deposit": 1049,
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "balance": 0,
+     "number_text": "000041"
+    }
+   ]
+  },
+  {
+   "label": "update invoice items",
+   "method": "PUT",
+   "path": "/invoices/4",
+   "status": 200,
+   "body": {
+    "id": 4,
+    "number": 44,
+    "type": "sale",
+    "invoice_date": "<today>",
+    "customer_name": "Sok Lea",
+    "phone": null,
+    "telegram": "@soklea",
+    "device": null,
+    "problem": null,
+    "pickup_date": null,
+    "booking_id": null,
+    "repair_id": null,
+    "warranty": "1_week",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Asus TUF A15",
+      "unit_price": 700
+     }
+    ],
+    "total": 700,
+    "deposit": 700,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "balance": 0,
+    "number_text": "000044"
+   }
+  },
+  {
+   "label": "update invoice number to a used one",
+   "method": "PUT",
+   "path": "/invoices/4",
+   "status": 409,
+   "body": {
+    "error": "Invoice number 000100 is already used"
+   }
+  },
+  {
+   "label": "update invoice type",
+   "method": "PUT",
+   "path": "/invoices/4",
+   "status": 400,
+   "body": {
+    "error": "The type of an invoice cannot be changed"
+   }
+  },
+  {
+   "label": "update missing invoice",
+   "method": "PUT",
+   "path": "/invoices/999",
+   "status": 404,
+   "body": {
+    "error": "Invoice not found"
+   }
+  },
+  {
+   "label": "next invoice number after all of it",
+   "method": "GET",
+   "path": "/invoices/next-number",
+   "status": 200,
+   "body": {
+    "number": 104
+   }
+  },
+  {
+   "label": "delete the sale of the first pickup",
+   "method": "DELETE",
+   "path": "/invoices/1",
+   "status": 200,
+   "body": {
+    "message": "Invoice deleted successfully"
+   }
+  },
+  {
+   "label": "booking that pointed at that sale",
+   "method": "GET",
+   "path": "/bookings/1",
+   "status": 200,
+   "body": {
+    "id": 1,
+    "product_id": 1,
+    "product_name": "MacBook Air 13\" M2",
+    "phone": "011 000 111",
+    "telegram": "@Horth_Heng",
+    "full_price": 1049,
+    "deposit": 300,
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "picked_up",
+    "images": [],
+    "sale_invoice_id": null,
+    "stock_held": false,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_image": "https://example.com/z.jpg",
+    "product_track_stock": false,
+    "sale_invoice_number": null,
+    "remaining_balance": 749
+   }
+  },
+  {
+   "label": "repair that pointed at that sale",
+   "method": "GET",
+   "path": "/repairs/4",
+   "status": 200,
+   "body": {
+    "id": 4,
+    "product_id": null,
+    "device": "MacBook Air",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Battery",
+    "received_date": "2026-11-12",
+    "back_on": null,
+    "cost": null,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "sale_invoice_number": null,
+    "sale_date": null,
+    "sale_warranty": null,
+    "stock_held": false,
+    "product_track_stock": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  },
+  {
+   "label": "delete missing invoice",
+   "method": "DELETE",
+   "path": "/invoices/999",
+   "status": 404,
+   "body": {
+    "error": "Invoice not found"
+   }
+  },
+  {
+   "label": "delete a product",
+   "method": "DELETE",
+   "path": "/products/4",
+   "status": 200,
+   "body": {
+    "message": "Product deleted successfully"
+   }
+  },
+  {
+   "label": "delete missing product",
+   "method": "DELETE",
+   "path": "/products/999",
+   "status": 404,
+   "body": {
+    "error": "Product not found"
+   }
+  },
+  {
+   "label": "a product of the HP brand",
+   "method": "POST",
+   "path": "/products",
+   "status": 201,
+   "body": {
+    "id": 5,
+    "sku": "WIN-HP-001",
+    "code": "LP-0005",
+    "name": "HP Spectre x360",
+    "category_id": 2,
+    "brand": "HP",
+    "model": null,
+    "description": null,
+    "selling_price": "1300.00",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/hp.jpg",
+    "images": [
+     "https://example.com/hp.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Windows"
+   }
+  },
+  {
+   "label": "delete a brand that has a product (the product goes too)",
+   "method": "DELETE",
+   "path": "/categories/2/brands/HP",
+   "status": 200,
+   "body": {
+    "message": "Brand deleted and 1 product(s)",
+    "deletedProducts": 1,
+    "category": {
+     "id": 2,
+     "name": "Windows",
+     "description": "Windows laptops (all makes)",
+     "brands": [
+      "Asus",
+      "Dell"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_count": 2
+    }
+   }
+  },
+  {
+   "label": "delete a brand that has products",
+   "method": "DELETE",
+   "path": "/categories/2/brands/Asus",
+   "status": 200,
+   "body": {
+    "message": "Brand deleted",
+    "deletedProducts": 0,
+    "category": {
+     "id": 2,
+     "name": "Windows",
+     "description": "Windows laptops (all makes)",
+     "brands": [
+      "Dell"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_count": 2
+    }
+   }
+  },
+  {
+   "label": "products after the brand delete",
+   "method": "GET",
+   "path": "/products?include_archived=true",
+   "status": 200,
+   "body": [
+    {
+     "id": 1,
+     "sku": "MAC-001",
+     "code": "LP-0001",
+     "name": "MacBook Air 13\" M2 (new)",
+     "category_id": 1,
+     "brand": "Apple",
+     "model": null,
+     "description": "Chip M2\nRam 8GB | Storage 256GB",
+     "selling_price": "1049.00",
+     "extra_prices": [
+      {
+       "label": "16GB / 512GB",
+       "price": 1299
+      }
+     ],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 1,
+     "hold_status": null,
+     "image_url": "https://example.com/z.jpg",
+     "images": [
+      "https://example.com/z.jpg"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Mac"
+    },
+    {
+     "id": 2,
+     "sku": "WIN-ASU-001",
+     "code": "LP-0002",
+     "name": "Asus TUF A15",
+     "category_id": 2,
+     "brand": "Dell",
+     "model": null,
+     "description": "Ryzen 7",
+     "selling_price": "749.50",
+     "extra_prices": [],
+     "track_stock": 0,
+     "stock_quantity": 1,
+     "min_stock_level": 0,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": null,
+     "images": [],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    },
+    {
+     "id": 3,
+     "sku": "WIN-DEL-001",
+     "code": "LP-0003",
+     "name": "Dell Inspiron 15",
+     "category_id": 2,
+     "brand": "Dell",
+     "model": null,
+     "description": null,
+     "selling_price": "520.00",
+     "extra_prices": [],
+     "track_stock": 1,
+     "stock_quantity": 2,
+     "min_stock_level": 1,
+     "is_archived": 0,
+     "hold_status": null,
+     "image_url": "https://example.com/d.png",
+     "images": [
+      "https://example.com/d.png"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "category_name": "Windows"
+    }
+   ]
+  },
+  {
+   "label": "delete a missing brand",
+   "method": "DELETE",
+   "path": "/categories/2/brands/Nope",
+   "status": 404,
+   "body": {
+    "error": "Brand not found"
+   }
+  },
+  {
+   "label": "create a category to delete",
+   "method": "POST",
+   "path": "/categories",
+   "status": 201,
+   "body": {
+    "id": 3,
+    "name": "Temp",
+    "description": null,
+    "brands": null,
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "product_count": 0
+   }
+  },
+  {
+   "label": "product in it",
+   "method": "POST",
+   "path": "/products",
+   "status": 201,
+   "body": {
+    "id": 6,
+    "sku": "TEM-001",
+    "code": "LP-0006",
+    "name": "Temp laptop",
+    "category_id": 3,
+    "brand": null,
+    "model": null,
+    "description": null,
+    "selling_price": "10.00",
+    "extra_prices": [],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": null,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>",
+    "category_name": "Temp"
+   }
+  },
+  {
+   "label": "delete that category (and its product)",
+   "method": "DELETE",
+   "path": "/categories/3",
+   "status": 200,
+   "body": {
+    "message": "Category deleted and 1 product(s)",
+    "deletedProducts": 1
+   }
+  },
+  {
+   "label": "delete missing category",
+   "method": "DELETE",
+   "path": "/categories/999",
+   "status": 404,
+   "body": {
+    "error": "Category not found"
+   }
+  },
+  {
+   "label": "categories at the end",
+   "method": "GET",
+   "path": "/categories",
+   "status": 200,
+   "body": [
+    {
+     "id": 1,
+     "name": "Mac",
+     "description": "Apple Mac laptops",
+     "brands": [
+      "Apple"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_count": 0
+    },
+    {
+     "id": 2,
+     "name": "Windows",
+     "description": "Windows laptops (all makes)",
+     "brands": [
+      "Dell"
+     ],
+     "created_at": "<time>",
+     "updated_at": "<time>",
+     "product_count": 2
+    }
+   ]
+  },
+  {
+   "label": "telegram status",
+   "method": "GET",
+   "path": "/telegram/status",
+   "status": 200,
+   "body": {
+    "sold": false,
+    "repair": false,
+    "booking": false
+   }
+  },
+  {
+   "label": "telegram send with a wrong kind",
+   "method": "POST",
+   "path": "/telegram/send",
+   "status": 400,
+   "body": {
+    "error": "kind must be one of: booking, repair, sold"
+   }
+  },
+  {
+   "label": "telegram send with a wrong id",
+   "method": "POST",
+   "path": "/telegram/send",
+   "status": 400,
+   "body": {
+    "error": "id must be a number"
+   }
+  },
+  {
+   "label": "telegram send for a missing booking",
+   "method": "POST",
+   "path": "/telegram/send",
+   "status": 404,
+   "body": {
+    "error": "Booking not found"
+   }
+  },
+  {
+   "label": "telegram send for a missing repair",
+   "method": "POST",
+   "path": "/telegram/send",
+   "status": 404,
+   "body": {
+    "error": "Repair not found"
+   }
+  },
+  {
+   "label": "telegram send for a missing sale",
+   "method": "POST",
+   "path": "/telegram/send",
+   "status": 404,
+   "body": {
+    "error": "Sale not found"
+   }
+  },
+  {
+   "label": "telegram send a booking (not set up)",
+   "method": "POST",
+   "path": "/telegram/send",
+   "status": 503,
+   "body": {
+    "error": "Telegram is not set up for the Booking group yet",
+    "notSetUp": true
+   }
+  },
+  {
+   "label": "telegram send a sale with a bad picture",
+   "method": "POST",
+   "path": "/telegram/send",
+   "status": 400,
+   "body": {
+    "error": "Invalid image data"
+   }
+  },
+  {
+   "label": "telegram send a sale (not set up)",
+   "method": "POST",
+   "path": "/telegram/send",
+   "status": 503,
+   "body": {
+    "error": "Telegram is not set up for the Sold group yet",
+    "notSetUp": true
+   }
+  },
+  {
+   "label": "config",
+   "method": "GET",
+   "path": "/config",
+   "status": 200,
+   "body": {
+    "publicUrl": ""
+   }
+  },
+  {
+   "label": "upload without data",
+   "method": "POST",
+   "path": "/uploads/image",
+   "status": 400,
+   "body": {
+    "error": "Invalid image data"
+   }
+  },
+  {
+   "label": "upload something that is not a picture",
+   "method": "POST",
+   "path": "/uploads/image",
+   "status": 400,
+   "body": {
+    "error": "That file is not a valid image"
+   }
+  },
+  {
+   "label": "upload a type that is not allowed",
+   "method": "POST",
+   "path": "/uploads/image",
+   "status": 400,
+   "body": {
+    "error": "Only PNG, JPG, WEBP or GIF images are allowed"
+   }
+  },
+  {
+   "label": "discard something that is not an upload",
+   "method": "DELETE",
+   "path": "/uploads/passwd",
+   "status": 400,
+   "body": {
+    "error": "That is not an uploaded photo"
+   }
+  },
+  {
+   "label": "discard an upload that does not exist",
+   "method": "DELETE",
+   "path": "/uploads/00000000-0000-0000-0000-000000000000.png",
+   "status": 200,
+   "body": {
+    "message": "Photo removed"
+   }
+  }
+ ],
+ "db": {
+  "users": [
+   {
+    "id": 1,
+    "username": "owner",
+    "email": "owner@test.local",
+    "password": "<hash>",
+    "full_name": "The Owner",
+    "role": "admin",
+    "phone": null,
+    "access_token": "<token>",
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 2,
+    "username": "helper",
+    "email": "helper@test.local",
+    "password": "<hash>",
+    "full_name": "The Helper",
+    "role": "staff",
+    "phone": null,
+    "access_token": "<token>",
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 3,
+    "username": "newbie",
+    "email": "newbie@test.local",
+    "password": "<hash>",
+    "full_name": "New Person",
+    "role": "staff",
+    "phone": "011 222 333",
+    "access_token": "<token>",
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  ],
+  "categories": [
+   {
+    "id": 1,
+    "name": "Mac",
+    "description": "Apple Mac laptops",
+    "brands": [
+     "Apple"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 2,
+    "name": "Windows",
+    "description": "Windows laptops (all makes)",
+    "brands": [
+     "Dell"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  ],
+  "products": [
+   {
+    "id": 1,
+    "sku": "MAC-001",
+    "code": "LP-0001",
+    "name": "MacBook Air 13\" M2 (new)",
+    "category_id": 1,
+    "brand": "Apple",
+    "model": null,
+    "description": "Chip M2\nRam 8GB | Storage 256GB",
+    "selling_price": "1049.00",
+    "extra_prices": [
+     {
+      "label": "16GB / 512GB",
+      "price": 1299
+     }
+    ],
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 1,
+    "hold_status": null,
+    "image_url": "https://example.com/z.jpg",
+    "images": [
+     "https://example.com/z.jpg"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 2,
+    "sku": "WIN-ASU-001",
+    "code": "LP-0002",
+    "name": "Asus TUF A15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": "Ryzen 7",
+    "selling_price": "749.50",
+    "extra_prices": null,
+    "track_stock": 0,
+    "stock_quantity": 1,
+    "min_stock_level": 0,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": null,
+    "images": null,
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 3,
+    "sku": "WIN-DEL-001",
+    "code": "LP-0003",
+    "name": "Dell Inspiron 15",
+    "category_id": 2,
+    "brand": "Dell",
+    "model": null,
+    "description": null,
+    "selling_price": "520.00",
+    "extra_prices": null,
+    "track_stock": 1,
+    "stock_quantity": 2,
+    "min_stock_level": 1,
+    "is_archived": 0,
+    "hold_status": null,
+    "image_url": "https://example.com/d.png",
+    "images": [
+     "https://example.com/d.png"
+    ],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  ],
+  "bookings": [
+   {
+    "id": 1,
+    "product_id": 1,
+    "product_name": "MacBook Air 13\" M2",
+    "phone": "011 000 111",
+    "telegram": "@Horth_Heng",
+    "full_price": "1049.00",
+    "deposit": "300.00",
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "picked_up",
+    "images": null,
+    "sale_invoice_id": null,
+    "stock_held": 0,
+    "telegram_messages": null,
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 2,
+    "product_id": null,
+    "product_name": "Lenovo ThinkPad | i7",
+    "phone": "+855 11 968 240",
+    "telegram": null,
+    "full_price": "800.00",
+    "deposit": "0.00",
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "picked_up",
+    "images": null,
+    "sale_invoice_id": 2,
+    "stock_held": 0,
+    "telegram_messages": null,
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 3,
+    "product_id": 3,
+    "product_name": "Dell Inspiron 15",
+    "phone": null,
+    "telegram": "@Horth_Heng",
+    "full_price": "520.00",
+    "deposit": "100.00",
+    "booking_date": "2026-11-10",
+    "pickup_date": "2026-11-20",
+    "status": "picked_up",
+    "images": null,
+    "sale_invoice_id": 3,
+    "stock_held": 0,
+    "telegram_messages": null,
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  ],
+  "repairs": [
+   {
+    "id": 1,
+    "product_id": 2,
+    "device": "Asus TUF A15",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Screen flickers",
+    "received_date": "2026-11-11",
+    "back_on": "2026-11-15",
+    "cost": "60.00",
+    "status": "picked_up",
+    "fixed_date": "2026-11-19",
+    "picked_up_date": "2026-11-19",
+    "sale_invoice_id": null,
+    "stock_held": 0,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 2,
+    "product_id": 2,
+    "device": "Asus TUF A15",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Screen flickers",
+    "received_date": "2026-11-11",
+    "back_on": null,
+    "cost": null,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "stock_held": 0,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 4,
+    "product_id": null,
+    "device": "MacBook Air",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Battery",
+    "received_date": "2026-11-12",
+    "back_on": null,
+    "cost": null,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "stock_held": 0,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 5,
+    "product_id": null,
+    "device": "Acer Aspire",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "problem": "Slow",
+    "received_date": "2026-11-19",
+    "back_on": null,
+    "cost": null,
+    "status": "received",
+    "fixed_date": null,
+    "picked_up_date": null,
+    "sale_invoice_id": null,
+    "stock_held": 0,
+    "images": [],
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  ],
+  "invoices": [
+   {
+    "id": 2,
+    "number": 42,
+    "type": "sale",
+    "invoice_date": "2026-11-19",
+    "customer_name": null,
+    "phone": "+855 11 968 240",
+    "telegram": null,
+    "device": null,
+    "problem": null,
+    "pickup_date": null,
+    "booking_id": null,
+    "repair_id": null,
+    "warranty": "none",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Lenovo ThinkPad | i7",
+      "unit_price": 800
+     }
+    ],
+    "total": "800.00",
+    "deposit": "800.00",
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 3,
+    "number": 43,
+    "type": "sale",
+    "invoice_date": "2026-11-19",
+    "customer_name": null,
+    "phone": null,
+    "telegram": "@someone",
+    "device": null,
+    "problem": null,
+    "pickup_date": null,
+    "booking_id": null,
+    "repair_id": null,
+    "warranty": "2_weeks",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Dell Inspiron 15",
+      "unit_price": 520
+     }
+    ],
+    "total": "520.00",
+    "deposit": "520.00",
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 4,
+    "number": 44,
+    "type": "sale",
+    "invoice_date": "2026-11-19",
+    "customer_name": "Sok Lea",
+    "phone": null,
+    "telegram": "@soklea",
+    "device": null,
+    "problem": null,
+    "pickup_date": null,
+    "booking_id": null,
+    "repair_id": null,
+    "warranty": "1_week",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Asus TUF A15",
+      "unit_price": 700
+     }
+    ],
+    "total": "700.00",
+    "deposit": "700.00",
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 5,
+    "number": 100,
+    "type": "sale",
+    "invoice_date": "2026-11-12",
+    "customer_name": null,
+    "phone": "012 345 678",
+    "telegram": null,
+    "device": null,
+    "problem": null,
+    "pickup_date": null,
+    "booking_id": null,
+    "repair_id": null,
+    "warranty": "none",
+    "items": [
+     {
+      "qty": 2,
+      "name": "Charger",
+      "unit_price": 15
+     }
+    ],
+    "total": "30.00",
+    "deposit": "0.00",
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 7,
+    "number": 101,
+    "type": "booking",
+    "invoice_date": "2026-11-19",
+    "customer_name": "Booker",
+    "phone": "011 111 111",
+    "telegram": null,
+    "device": null,
+    "problem": null,
+    "pickup_date": "2026-11-30",
+    "booking_id": null,
+    "repair_id": null,
+    "warranty": "none",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Dell Inspiron 15",
+      "unit_price": 520
+     }
+    ],
+    "total": "520.00",
+    "deposit": "100.00",
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 8,
+    "number": 102,
+    "type": "booking",
+    "invoice_date": "2026-11-19",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "device": null,
+    "problem": null,
+    "pickup_date": "2026-11-30",
+    "booking_id": 2,
+    "repair_id": null,
+    "warranty": "none",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Lenovo",
+      "unit_price": 800
+     }
+    ],
+    "total": "800.00",
+    "deposit": "0.00",
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   },
+   {
+    "id": 10,
+    "number": 103,
+    "type": "repair",
+    "invoice_date": "2026-11-19",
+    "customer_name": null,
+    "phone": null,
+    "telegram": null,
+    "device": "Lenovo IdeaPad",
+    "problem": "No power",
+    "pickup_date": null,
+    "booking_id": null,
+    "repair_id": 4,
+    "warranty": "none",
+    "items": [
+     {
+      "qty": 1,
+      "name": "Labour",
+      "unit_price": 25
+     }
+    ],
+    "total": "25.00",
+    "deposit": "0.00",
+    "created_at": "<time>",
+    "updated_at": "<time>"
+   }
+  ]
+ }
+}

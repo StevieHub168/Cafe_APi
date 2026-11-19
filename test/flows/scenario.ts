@@ -1,0 +1,277 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// The scenario: what a shop does in a day, plus the mistakes people make. Every answer is recorded.
+// It was first run on the ORIGINAL JavaScript API; golden.json holds what that API answered. The TypeScript / Sequelize version must answer the same.
+export type Call = (label: string, method: string, path: string, options?: { token?: string; body?: unknown }) => Promise<{ status: number; body: any }>;
+export interface Context { tokens: { admin?: string; staff?: string }; ids: Record<string, number> }
+
+export async function scenario(call: Call, ctx: Context): Promise<void> {
+  const A = (label: string, method: string, path: string, body?: unknown) => call(label, method, path, { token: ctx.tokens.admin, body });
+  const S = (label: string, method: string, path: string, body?: unknown) => call(label, method, path, { token: ctx.tokens.staff, body });
+  const id = ctx.ids;
+
+  // ---------- sign in ----------
+  const loginAdmin = await call('login owner', 'POST', '/auth/login', { body: { email: 'owner@test.local', password: 'Admin-pass-1' } });
+  ctx.tokens.admin = loginAdmin.body.token;
+  const loginStaff = await call('login helper', 'POST', '/auth/login', { body: { email: 'helper@test.local', password: 'Staff-pass-1' } });
+  ctx.tokens.staff = loginStaff.body.token;
+  await call('login wrong password', 'POST', '/auth/login', { body: { email: 'owner@test.local', password: 'nope' } });
+  await call('login unknown email', 'POST', '/auth/login', { body: { email: 'nobody@test.local', password: 'nope' } });
+  await call('login missing password', 'POST', '/auth/login', { body: { email: 'owner@test.local' } });
+  await call('login with no body', 'POST', '/auth/login');
+  await call('telegram-login without data', 'POST', '/auth/telegram-login', { body: {} });
+  await call('telegram-login forged data', 'POST', '/auth/telegram-login', { body: { initData: 'user=%7B%22id%22%3A1%7D&auth_date=1&hash=abc' } });
+  await A('me', 'GET', '/auth/me');
+  await call('me without token', 'GET', '/auth/me');
+  await call('me with a made-up token', 'GET', '/auth/me', { token: 'abc.def.ghi' });
+  await A('user info', 'GET', '/auth/user/2');
+  await A('user info missing', 'GET', '/auth/user/999');
+  await S('user info as staff', 'GET', '/auth/user/1');
+  await A('users list', 'GET', '/users');
+  await S('users list as staff', 'GET', '/users');
+  await A('register without fields', 'POST', '/auth/register', { username: 'x' });
+  await A('register staff', 'POST', '/auth/register', { username: 'newbie', email: 'newbie@test.local', password: 'Newbie-pass-1', full_name: 'New Person', phone: '011 222 333' });
+  await A('register duplicate email', 'POST', '/auth/register', { username: 'another', email: 'newbie@test.local', password: 'Newbie-pass-1' });
+  await A('register duplicate username', 'POST', '/auth/register', { username: 'newbie', email: 'other@test.local', password: 'Newbie-pass-1' });
+  await S('register as staff', 'POST', '/auth/register', { username: 'sneaky', email: 'sneaky@test.local', password: 'Sneaky-pass-1' });
+  await A('reset password too short', 'PUT', '/users/3/password', { password: 'short' });
+  await A('reset password empty', 'PUT', '/users/3/password', { password: '   ' });
+  await A('reset password of nobody', 'PUT', '/users/999/password', { password: 'Long-enough-1' });
+  await A('reset password', 'PUT', '/users/3/password', { password: 'Brand-new-pass-1' });
+  await call('login with the new password', 'POST', '/auth/login', { body: { email: 'newbie@test.local', password: 'Brand-new-pass-1' } });
+  await call('login with the old password', 'POST', '/auth/login', { body: { email: 'newbie@test.local', password: 'Newbie-pass-1' } });
+  await call('logout helper', 'POST', '/auth/logout', { token: ctx.tokens.staff });
+  await S('helper token after logout', 'GET', '/auth/me');
+  ctx.tokens.staff = (await call('login helper again', 'POST', '/auth/login', { body: { email: 'helper@test.local', password: 'Staff-pass-1' } })).body.token;
+  await call('products without token', 'GET', '/products');
+  await call('a path that does not exist', 'GET', '/nothing-here');
+
+  // ---------- categories and brands ----------
+  await A('categories (none yet)', 'GET', '/categories');
+  id.mac = (await A('create Mac', 'POST', '/categories', { name: 'Mac', description: 'Apple Mac laptops' })).body.id;
+  id.win = (await A('create Windows', 'POST', '/categories', { name: 'Windows', description: 'Windows laptops' })).body.id;
+  await A('create category without name', 'POST', '/categories', { name: '  ' });
+  await A('create duplicate category', 'POST', '/categories', { name: 'Mac' });
+  await A('category by id', 'GET', `/categories/${id.mac}`);
+  await A('category missing', 'GET', '/categories/999');
+  await A('add brand Apple to Mac', 'POST', `/categories/${id.mac}/brands`, { name: 'Apple' });
+  await A('add brand Asus', 'POST', `/categories/${id.win}/brands`, { name: 'Asus' });
+  await A('add brand Dell', 'POST', `/categories/${id.win}/brands`, { name: 'Dell' });
+  await A('add brand HP', 'POST', `/categories/${id.win}/brands`, { name: ' HP ' });
+  await A('add duplicate brand (other capitals)', 'POST', `/categories/${id.win}/brands`, { name: 'dell' });
+  await A('add brand without name', 'POST', `/categories/${id.win}/brands`, { name: '' });
+  await A('add brand too long', 'POST', `/categories/${id.win}/brands`, { name: 'x'.repeat(101) });
+  await A('add brand to missing category', 'POST', '/categories/999/brands', { name: 'Acer' });
+  await A('rename a brand to an existing one', 'PUT', `/categories/${id.win}/brands/HP`, { name: 'Asus' });
+  await A('rename missing brand', 'PUT', `/categories/${id.win}/brands/Nope`, { name: 'Acer' });
+  await A('update category', 'PUT', `/categories/${id.win}`, { description: 'Windows laptops (all makes)' });
+  await A('update category to a taken name', 'PUT', `/categories/${id.win}`, { name: 'Mac' });
+  await A('update category with an empty name', 'PUT', `/categories/${id.win}`, { name: ' ' });
+  await A('update missing category', 'PUT', '/categories/999', { name: 'Zed' });
+  await A('categories', 'GET', '/categories');
+
+  // ---------- products ----------
+  id.p1 = (await A('create Mac laptop (brand and sku automatic)', 'POST', '/products', {
+    name: 'MacBook Air 13" M2', category_id: id.mac, description: 'Chip M2\r\nRam 8GB | Storage 256GB', selling_price: 1099,
+    extra_prices: [{ label: '16GB / 512GB', price: 1299 }, { label: '', price: '' }], images: ['https://example.com/a.jpg', 'https://example.com/b.jpg', 'https://example.com/a.jpg']
+  })).body.id;
+  id.p2 = (await A('create Windows laptop with a brand', 'POST', '/products', { name: 'Asus TUF A15', category_id: id.win, brand: 'asus', selling_price: '749.5', description: 'Ryzen 7' })).body.id;
+  id.p3 = (await A('create counted stock', 'POST', '/products', { name: 'Dell Inspiron 15', category_id: id.win, brand: 'Dell', selling_price: 520, track_stock: true, stock_quantity: 3, min_stock_level: 1, image_url: 'https://example.com/d.png' })).body.id;
+  id.p4 = (await A('create another single laptop', 'POST', '/products', { name: 'HP Pavilion', category_id: id.win, brand: 'HP', selling_price: 640, sku: 'MY-SKU-1' })).body.id;
+  await A('create Windows without brand', 'POST', '/products', { name: 'No brand', category_id: id.win, selling_price: 100 });
+  await A('create with a brand that is not allowed', 'POST', '/products', { name: 'Odd', category_id: id.win, brand: 'Toshiba', selling_price: 100 });
+  await A('create without a name', 'POST', '/products', { category_id: id.mac, selling_price: 100 });
+  await A('create without a category', 'POST', '/products', { name: 'Lonely', selling_price: 100 });
+  await A('create in a missing category', 'POST', '/products', { name: 'Ghost', category_id: 999, selling_price: 100 });
+  await A('create with a bad price', 'POST', '/products', { name: 'Free?', category_id: id.mac, selling_price: -5 });
+  await A('create with a text price', 'POST', '/products', { name: 'Free?', category_id: id.mac, selling_price: 'abc' });
+  await A('create with a duplicate sku', 'POST', '/products', { name: 'Same sku', category_id: id.mac, selling_price: 10, sku: 'MY-SKU-1' });
+  await A('create with a bad photo', 'POST', '/products', { name: 'Photo', category_id: id.mac, selling_price: 10, images: ['ftp://nope'] });
+  await A('create with photos that are not a list', 'POST', '/products', { name: 'Photo', category_id: id.mac, selling_price: 10, images: 'x' });
+  await A('create with a half-filled extra price', 'POST', '/products', { name: 'Extra', category_id: id.mac, selling_price: 10, extra_prices: [{ label: 'only label' }] });
+  await A('create with a bad stock count', 'POST', '/products', { name: 'Stock', category_id: id.win, brand: 'Dell', selling_price: 10, track_stock: true, stock_quantity: -2 });
+  await A('products (menu list)', 'GET', '/products');
+  await A('products (with archived)', 'GET', '/products?include_archived=true');
+  await A('product by id', 'GET', `/products/${id.p1}`);
+  await A('product missing', 'GET', '/products/999');
+  await A('product by code', 'GET', '/products/by-code/lp-0002');
+  await A('product by a code nobody has', 'GET', '/products/by-code/LP-0999');
+  await A('product by a bad code', 'GET', '/products/by-code/hello');
+  await A('low stock (none yet)', 'GET', '/products/low-stock');
+  await A('update product price and name', 'PUT', `/products/${id.p1}`, { selling_price: 1049, name: 'MacBook Air 13" M2 (new)' });
+  await A('update product with the SAME values', 'PUT', `/products/${id.p1}`, { selling_price: 1049, name: 'MacBook Air 13" M2 (new)' });
+  await A('update product with nothing to change', 'PUT', `/products/${id.p1}`, {});
+  await A('update product photos', 'PUT', `/products/${id.p1}`, { images: ['https://example.com/z.jpg'] });
+  await A('update product to a taken sku', 'PUT', `/products/${id.p2}`, { sku: 'MY-SKU-1' });
+  await A('update product to its own sku', 'PUT', `/products/${id.p4}`, { sku: 'MY-SKU-1', selling_price: 650 });
+  await A('update product brand', 'PUT', `/products/${id.p2}`, { brand: 'Dell' });
+  await A('update product with a wrong brand', 'PUT', `/products/${id.p2}`, { brand: 'Toshiba' });
+  await A('update product to a missing category', 'PUT', `/products/${id.p2}`, { category_id: 999 });
+  await A('update counted stock', 'PUT', `/products/${id.p3}`, { stock_quantity: 1, min_stock_level: 2 });
+  await A('low stock', 'GET', '/products/low-stock');
+  await A('turn counted stock into a single laptop', 'PUT', `/products/${id.p3}`, { track_stock: false });
+  await A('turn it back to counted stock', 'PUT', `/products/${id.p3}`, { track_stock: true, stock_quantity: 3, min_stock_level: 1 });
+  await A('update missing product', 'PUT', '/products/999', { name: 'x' });
+  await A('rename a brand (renames its products)', 'PUT', `/categories/${id.win}/brands/Dell`, { name: 'Dell Inc' });
+  await A('product after the brand rename', 'GET', `/products/${id.p3}`);
+  await A('rename it back', 'PUT', `/categories/${id.win}/brands/${encodeURIComponent('Dell Inc')}`, { name: 'Dell' });
+
+  // ---------- bookings ----------
+  const booking = (extra: Record<string, unknown> = {}) => ({ product_id: id.p1, product_name: 'MacBook Air 13" M2', telegram: '@Horth_Heng', full_price: 1049, deposit: 300, booking_date: '2026-11-10', pickup_date: '2026-11-20', ...extra });
+  id.b1 = (await A('book the single Mac', 'POST', '/bookings', booking())).body.id;
+  await A('Mac after it was booked', 'GET', `/products/${id.p1}`);
+  await A('menu list without the booked laptop', 'GET', '/products');
+  await A('book the same laptop again', 'POST', '/bookings', booking());
+  await A('book with a missing product', 'POST', '/bookings', booking({ product_id: 999 }));
+  await A('book without a product name', 'POST', '/bookings', booking({ product_id: null, product_name: ' ' }));
+  await A('book without a way to reach the customer', 'POST', '/bookings', booking({ product_id: null, telegram: null, phone: null }));
+  await A('book with a price of 0', 'POST', '/bookings', booking({ product_id: null, full_price: 0 }));
+  await A('book with a deposit above the price', 'POST', '/bookings', booking({ product_id: null, deposit: 2000 }));
+  await A('book with a wrong phone', 'POST', '/bookings', booking({ product_id: null, phone: 'abc' }));
+  await A('book with a wrong telegram', 'POST', '/bookings', booking({ product_id: null, telegram: 'a b' }));
+  await A('book with pickup before booking', 'POST', '/bookings', booking({ product_id: null, pickup_date: '2026-11-01' }));
+  await A('book with a date that does not exist', 'POST', '/bookings', booking({ product_id: null, pickup_date: '2026-02-31' }));
+  await A('book with a wrong status', 'POST', '/bookings', booking({ product_id: null, status: 'lost' }));
+  id.b2 = (await A('book a laptop typed by hand', 'POST', '/bookings', booking({ product_id: null, product_name: 'Lenovo ThinkPad | i7', telegram: null, phone: '+855 11 968 240', full_price: 800, deposit: 0 }))).body.id;
+  id.b3 = (await A('book the counted stock', 'POST', '/bookings', booking({ product_id: id.p3, product_name: 'Dell Inspiron 15', full_price: 520, deposit: 100 }))).body.id;
+  await A('counted stock after the booking (one less)', 'GET', `/products/${id.p3}`);
+  await A('bookings', 'GET', '/bookings');
+  await A('bookings by status', 'GET', '/bookings?status=booked');
+  await A('bookings by a wrong status', 'GET', '/bookings?status=lost');
+  await A('booking by id', 'GET', `/bookings/${id.b1}`);
+  await A('booking missing', 'GET', '/bookings/999');
+  await A('update booking phone only', 'PUT', `/bookings/${id.b1}`, { phone: '011 968 240' });
+  await A('update booking with a bad price', 'PUT', `/bookings/${id.b1}`, { deposit: 5000 });
+  await A('update missing booking', 'PUT', '/bookings/999', { phone: '011 968 240' });
+  await A('cancel the booking of the single Mac', 'PUT', `/bookings/${id.b1}`, { status: 'cancelled' });
+  await A('Mac after the cancel (free again)', 'GET', `/products/${id.p1}`);
+  await A('book it again after the cancel', 'PUT', `/bookings/${id.b1}`, { status: 'booked' });
+  await A('Mac after it was booked again', 'GET', `/products/${id.p1}`);
+  await A('move the booking to another laptop', 'PUT', `/bookings/${id.b1}`, { product_id: id.p4, product_name: 'HP Pavilion' });
+  await A('both laptops after the move', 'GET', '/products?include_archived=true');
+  await A('move it back', 'PUT', `/bookings/${id.b1}`, { product_id: id.p1, product_name: 'MacBook Air 13" M2' });
+  await A('pickup with a wrong warranty', 'POST', `/bookings/${id.b1}/pickup`, { warranty: 'forever' });
+  await A('pickup with a long customer name', 'POST', `/bookings/${id.b1}/pickup`, { customer_name: 'n'.repeat(101) });
+  await A('pickup', 'POST', `/bookings/${id.b1}/pickup`, { customer_name: 'Horth Heng', warranty: '1_month' });
+  await A('Mac after the pickup (sold)', 'GET', `/products/${id.p1}`);
+  await A('pickup again', 'POST', `/bookings/${id.b1}/pickup`, {});
+  await A('picked-up booking by id', 'GET', `/bookings/${id.b1}`);
+  await A('update a picked-up booking', 'PUT', `/bookings/${id.b1}`, { phone: '011 000 111' });
+  await A('pickup of missing booking', 'POST', '/bookings/999/pickup', {});
+  await A('pickup of the hand-typed booking (phone from the booking)', 'POST', `/bookings/${id.b2}/pickup`, { warranty: 'none' });
+  await A('pickup of the counted stock', 'POST', `/bookings/${id.b3}/pickup`, { telegram: '@someone', warranty: '2_weeks' });
+  await A('counted stock after its pickup (stays one less)', 'GET', `/products/${id.p3}`);
+  id.b4 = (await A('book counted stock again', 'POST', '/bookings', booking({ product_id: id.p3, product_name: 'Dell Inspiron 15', full_price: 520, deposit: 0 }))).body.id;
+  await A('delete that booking (stock comes back)', 'DELETE', `/bookings/${id.b4}`);
+  await A('counted stock after the delete', 'GET', `/products/${id.p3}`);
+  await A('delete missing booking', 'DELETE', '/bookings/999');
+  await A('bookings', 'GET', '/bookings');
+
+  // ---------- repairs ----------
+  const repair = (extra: Record<string, unknown> = {}) => ({ product_id: id.p2, device: 'Asus TUF A15', problem: 'Screen flickers', received_date: '2026-11-11', ...extra });
+  id.r1 = (await A('repair the shop laptop', 'POST', '/repairs', repair({ cost: 45, back_on: '2026-11-15' }))).body.id;
+  await A('laptop after the repair started', 'GET', `/products/${id.p2}`);
+  await A('book a laptop that is in repair', 'POST', '/bookings', booking({ product_id: id.p2, product_name: 'Asus TUF A15' }));
+  await A('repair of a laptop already in repair', 'POST', '/repairs', repair());
+  id.r2 = (await A('repair a customer laptop', 'POST', '/repairs', { device: 'Lenovo IdeaPad', customer_name: 'Vanna Chea', phone: '099 111 222', problem: 'No power' })).body.id;
+  await A('repair without a device', 'POST', '/repairs', { problem: 'x' });
+  await A('repair without a problem', 'POST', '/repairs', { device: 'x' });
+  await A('repair with a wrong status', 'POST', '/repairs', repair({ product_id: null, status: 'lost' }));
+  await A('repair with back-on before received', 'POST', '/repairs', repair({ product_id: null, back_on: '2026-11-01' }));
+  await A('repair with a bad cost', 'POST', '/repairs', repair({ product_id: null, cost: -1 }));
+  await A('repair of a missing product', 'POST', '/repairs', repair({ product_id: 999 }));
+  await A('repair with a missing sale', 'POST', '/repairs', repair({ product_id: null, sale_invoice_id: 999 }));
+  await A('repairs', 'GET', '/repairs');
+  await A('repairs by status', 'GET', '/repairs?status=received');
+  await A('repairs by a wrong status', 'GET', '/repairs?status=lost');
+  await A('repair by id', 'GET', `/repairs/${id.r1}`);
+  await A('repair missing', 'GET', '/repairs/999');
+  await A('repair fixed', 'PUT', `/repairs/${id.r1}`, { status: 'fixed' });
+  await A('laptop after the repair was fixed', 'GET', `/products/${id.p2}`);
+  await A('repair back to received', 'PUT', `/repairs/${id.r1}`, { status: 'received' });
+  await A('laptop in repair again', 'GET', `/products/${id.p2}`);
+  await A('repair picked up', 'PUT', `/repairs/${id.r1}`, { status: 'picked_up', cost: 60 });
+  await A('laptop after the pickup', 'GET', `/products/${id.p2}`);
+  await A('update repair problem', 'PUT', `/repairs/${id.r2}`, { problem: 'No power, no charge light', back_on: '2026-11-25' });
+  await A('update missing repair', 'PUT', '/repairs/999', { problem: 'x' });
+  id.r3 = (await A('repair of a laptop whose sale exists', 'POST', '/repairs', { device: 'MacBook Air', problem: 'Battery', sale_invoice_id: 1, received_date: '2026-11-12' })).body.id;
+  await A('repair without a date (today is used)', 'POST', '/repairs', { device: 'Acer Aspire', problem: 'Slow' });
+  await A('repairs', 'GET', '/repairs');
+  await A('delete a repair that holds a laptop', 'DELETE', `/repairs/${id.r2}`);
+  await A('delete missing repair', 'DELETE', '/repairs/999');
+
+  // ---------- invoices ----------
+  await A('next invoice number', 'GET', '/invoices/next-number');
+  await A('invoices (made by the pickups)', 'GET', '/invoices');
+  await A('invoices of type sale', 'GET', '/invoices?type=sale');
+  await A('invoices of a wrong type', 'GET', '/invoices?type=gift');
+  id.i1 = (await A('create a sale', 'POST', '/invoices', { type: 'sale', customer_name: ' Sok  Lea ', telegram: '@soklea', warranty: '1_week', deposit: 749.5, items: [{ name: 'Asus TUF A15', qty: 1, unit_price: 749.5 }] })).body.id;
+  await A('create a sale with its own number', 'POST', '/invoices', { type: 'sale', number: 100, invoice_date: '2026-11-12', items: [{ name: 'Charger', qty: 2, unit_price: 15 }, { name: '', unit_price: '' }], phone: '012 345 678' });
+  await A('create a sale with a number that is used', 'POST', '/invoices', { type: 'sale', number: 100, items: [{ name: 'Mouse', unit_price: 5 }] });
+  id.i3 = (await A('create a booking invoice', 'POST', '/invoices', { type: 'booking', pickup_date: '2026-11-30', customer_name: 'Booker', phone: '011 111 111', deposit: 100, items: [{ name: 'Dell Inspiron 15', unit_price: 520 }] })).body.id;
+  await A('booking invoice for a booking that has one (via a booking that exists)', 'POST', '/invoices', { type: 'booking', pickup_date: '2026-11-30', booking_id: id.b2, items: [{ name: 'Lenovo', unit_price: 800 }] });
+  await A('second invoice for that booking', 'POST', '/invoices', { type: 'booking', pickup_date: '2026-11-30', booking_id: id.b2, items: [{ name: 'Lenovo', unit_price: 800 }] });
+  await A('booking invoice with pickup before the date', 'POST', '/invoices', { type: 'booking', invoice_date: '2026-11-12', pickup_date: '2026-11-01', items: [{ name: 'x', unit_price: 5 }] });
+  await A('booking invoice without a pickup date', 'POST', '/invoices', { type: 'booking', items: [{ name: 'x', unit_price: 5 }] });
+  await A('booking invoice for a missing booking', 'POST', '/invoices', { type: 'booking', pickup_date: '2026-11-30', booking_id: 999, items: [{ name: 'x', unit_price: 5 }] });
+  id.i4 = (await A('create a repair invoice', 'POST', '/invoices', { type: 'repair', device: 'Lenovo IdeaPad', problem: 'No power', repair_id: id.r3, items: [{ name: 'Labour', unit_price: 25 }] })).body.id;
+  await A('second invoice for that repair', 'POST', '/invoices', { type: 'repair', device: 'x', problem: 'y', repair_id: id.r3, items: [{ name: 'Labour', unit_price: 25 }] });
+  await A('repair invoice without a device', 'POST', '/invoices', { type: 'repair', problem: 'y', items: [{ name: 'Labour', unit_price: 25 }] });
+  await A('repair invoice for a missing repair', 'POST', '/invoices', { type: 'repair', device: 'x', problem: 'y', repair_id: 999, items: [{ name: 'Labour', unit_price: 25 }] });
+  await A('invoice without a type', 'POST', '/invoices', { items: [{ name: 'x', unit_price: 5 }] });
+  await A('invoice with a wrong type', 'POST', '/invoices', { type: 'gift', items: [{ name: 'x', unit_price: 5 }] });
+  await A('invoice without items', 'POST', '/invoices', { type: 'sale', items: [] });
+  await A('invoice with items that are not a list', 'POST', '/invoices', { type: 'sale', items: 'x' });
+  await A('invoice with too many items', 'POST', '/invoices', { type: 'booking', pickup_date: '2026-12-01', items: Array.from({ length: 6 }, (_: unknown, i: number) => ({ name: `Item ${i}`, unit_price: 1 })) });
+  await A('invoice with an item without a name', 'POST', '/invoices', { type: 'sale', items: [{ name: '', unit_price: 5 }, { name: 'ok', unit_price: 5 }] });
+  await A('invoice with a bad quantity', 'POST', '/invoices', { type: 'sale', items: [{ name: 'x', qty: 0, unit_price: 5 }] });
+  await A('invoice with a bad price', 'POST', '/invoices', { type: 'sale', items: [{ name: 'x', unit_price: -5 }] });
+  await A('invoice with a total of 0', 'POST', '/invoices', { type: 'sale', items: [{ name: 'x', unit_price: 0 }] });
+  await A('invoice with a deposit above the total', 'POST', '/invoices', { type: 'sale', deposit: 99, items: [{ name: 'x', unit_price: 5 }] });
+  await A('invoice with a wrong warranty', 'POST', '/invoices', { type: 'sale', warranty: 'forever', items: [{ name: 'x', unit_price: 5 }] });
+  await A('invoice with a wrong date', 'POST', '/invoices', { type: 'sale', invoice_date: '12/11/2026', items: [{ name: 'x', unit_price: 5 }] });
+  await A('invoice with a wrong number', 'POST', '/invoices', { type: 'sale', number: 0, items: [{ name: 'x', unit_price: 5 }] });
+  await A('invoice with a name that is too long', 'POST', '/invoices', { type: 'sale', items: [{ name: 'n'.repeat(91), unit_price: 5 }] });
+  await A('invoice by id', 'GET', `/invoices/${id.i1}`);
+  await A('invoice missing', 'GET', '/invoices/999');
+  await A('invoices', 'GET', '/invoices');
+  await A('update invoice items', 'PUT', `/invoices/${id.i1}`, { items: [{ name: 'Asus TUF A15', qty: 1, unit_price: 700 }], deposit: 700 });
+  await A('update invoice number to a used one', 'PUT', `/invoices/${id.i1}`, { number: 100 });
+  await A('update invoice type', 'PUT', `/invoices/${id.i1}`, { type: 'repair' });
+  await A('update missing invoice', 'PUT', '/invoices/999', { deposit: 1 });
+  await A('next invoice number after all of it', 'GET', '/invoices/next-number');
+  await A('delete the sale of the first pickup', 'DELETE', '/invoices/1');
+  await A('booking that pointed at that sale', 'GET', `/bookings/${id.b1}`);
+  await A('repair that pointed at that sale', 'GET', `/repairs/${id.r3}`);
+  await A('delete missing invoice', 'DELETE', '/invoices/999');
+
+  // ---------- deleting products and categories ----------
+  await A('delete a product', 'DELETE', `/products/${id.p4}`);
+  await A('delete missing product', 'DELETE', '/products/999');
+  await A('a product of the HP brand', 'POST', '/products', { name: 'HP Spectre x360', category_id: id.win, brand: 'hp', selling_price: 1300, images: ['https://example.com/hp.jpg'] });
+  await A('delete a brand that has a product (the product goes too)', 'DELETE', `/categories/${id.win}/brands/HP`);
+  await A('delete a brand that has products', 'DELETE', `/categories/${id.win}/brands/Asus`);
+  await A('products after the brand delete', 'GET', '/products?include_archived=true');
+  await A('delete a missing brand', 'DELETE', `/categories/${id.win}/brands/Nope`);
+  id.temp = (await A('create a category to delete', 'POST', '/categories', { name: 'Temp' })).body.id;
+  await A('product in it', 'POST', '/products', { name: 'Temp laptop', category_id: id.temp, selling_price: 10 });
+  await A('delete that category (and its product)', 'DELETE', `/categories/${id.temp}`);
+  await A('delete missing category', 'DELETE', '/categories/999');
+  await A('categories at the end', 'GET', '/categories');
+
+  // ---------- telegram, config, uploads ----------
+  await A('telegram status', 'GET', '/telegram/status');
+  await A('telegram send with a wrong kind', 'POST', '/telegram/send', { kind: 'gossip', id: 1 });
+  await A('telegram send with a wrong id', 'POST', '/telegram/send', { kind: 'booking', id: 'x' });
+  await A('telegram send for a missing booking', 'POST', '/telegram/send', { kind: 'booking', id: 999 });
+  await A('telegram send for a missing repair', 'POST', '/telegram/send', { kind: 'repair', id: 999 });
+  await A('telegram send for a missing sale', 'POST', '/telegram/send', { kind: 'sold', id: 999 });
+  await A('telegram send a booking (not set up)', 'POST', '/telegram/send', { kind: 'booking', id: id.b1 });
+  await A('telegram send a sale with a bad picture', 'POST', '/telegram/send', { kind: 'sold', id: id.i1, picture: 'not-a-picture' });
+  await A('telegram send a sale (not set up)', 'POST', '/telegram/send', { kind: 'sold', id: id.i1 });
+  await A('config', 'GET', '/config');
+  await A('upload without data', 'POST', '/uploads/image', {});
+  await A('upload something that is not a picture', 'POST', '/uploads/image', { data: 'data:image/png;base64,aGVsbG8=' });
+  await A('upload a type that is not allowed', 'POST', '/uploads/image', { data: 'data:text/plain;base64,aGVsbG8=' });
+  await A('discard something that is not an upload', 'DELETE', '/uploads/passwd');
+  await A('discard an upload that does not exist', 'DELETE', '/uploads/00000000-0000-0000-0000-000000000000.png');
+}
