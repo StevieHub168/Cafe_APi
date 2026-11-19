@@ -2,7 +2,9 @@ const Booking = require('../models/Booking');
 const Product = require('../models/Product');
 const InvoiceService = require('./invoiceService');
 const StockHold = require('./stockHoldService');
-const { PUBLIC_PREFIX, isUploadName, removeImage } = require('../utils/uploads');
+const Telegram = require('./telegramService');
+const { cleanUploadedPhotos } = require('../utils/uploads');
+const { removeFilesNobodyUses } = require('./photoService');
 const { cleanMoney, cleanPhone, cleanTelegram, cleanDate } = require('../utils/clean');
 
 const STATUSES = ['booked', 'picked_up', 'cancelled'];
@@ -18,28 +20,7 @@ const STATUS_WORDS = { picked_up: 'picked up', cancelled: 'cancelled', booked: '
 // ---------- cleaning each field (cleanMoney / cleanPhone / cleanTelegram / cleanDate come from utils/clean.js) ----------
 
 // Photos of a booking (e.g. the deposit receipt): only files uploaded through this app, at most 4, no repeats.
-function cleanPhotos(list) {
-    if (list === null || list === undefined || list === '') return [];
-    if (!Array.isArray(list)) throw new Error('Photos must be a list');
-    const photos = [];
-    for (const item of list) {
-        const url = String(item ?? '').trim();
-        if (!url.startsWith(PUBLIC_PREFIX) || !isUploadName(url.slice(PUBLIC_PREFIX.length))) {
-            throw new Error('A booking photo must be one uploaded from this app');
-        }
-        if (!photos.includes(url)) photos.push(url);
-    }
-    if (photos.length > MAX_PHOTOS) throw new Error(`A booking can have at most ${MAX_PHOTOS} photos`);
-    return photos;
-}
-
-// Deletes uploaded files that nothing uses any more (a photo removed from a booking, or a booking that was deleted).
-// Called AFTER the database changed, so "in use" already reflects the new state.
-async function removeFilesNobodyUses(urls) {
-    for (const url of urls) {
-        if (!(await Product.usesPhoto(url)) && !(await Booking.usesPhoto(url))) removeImage(url);
-    }
-}
+const cleanPhotos = (list) => cleanUploadedPhotos(list, 'booking', MAX_PHOTOS);
 
 // Checks a COMPLETE booking and returns it in the shape the model saves.
 async function prepare(input) {
@@ -214,6 +195,35 @@ class BookingService {
         if (current && current.stock_held && current.status === 'booked') await StockHold.release(current.product_id);
         await removeFilesNobodyUses(current ? current.images : []);
         return { message: 'Booking deleted successfully' };
+    }
+
+    // ---------- the Booking message in Telegram ----------
+
+    // Keeps the ids of the Telegram messages just sent for this booking, so they can be taken down when the laptop is sold.
+    // Never throws: the booking and the message are fine either way.
+    static async rememberTelegramMessages(bookingId, chatId, messageIds) {
+        try {
+            await Booking.addTelegramMessages(bookingId, chatId, messageIds);
+        } catch (error) {
+            console.warn(`Telegram: the booking message was sent but its ids were not kept (${error.message})`);
+        }
+    }
+
+    // The laptop was SOLD (this Sale) and the Sold message is in its group: the Booking message is not needed any more, so it is
+    // taken down. Answers how many Telegram messages went. Never throws: when it does not work the message just stays.
+    static async takeDownBookingMessage(saleInvoiceId) {
+        try {
+            const booking = await Booking.findBySaleInvoice(saleInvoiceId);
+            if (!booking) return 0;                          // this Sale was not made from a booking
+            const sent = await Booking.getTelegramMessages(booking.id);
+            if (sent.length === 0) return 0;                 // nothing was kept (it was sent before this was added, or never sent)
+            const { removed } = await Telegram.remove('booking', sent);
+            await Booking.clearTelegramMessages(booking.id);
+            return removed;
+        } catch (error) {
+            console.warn(`Telegram: the booking message was not taken down (${error.message})`);
+            return 0;
+        }
     }
 }
 

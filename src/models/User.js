@@ -48,6 +48,11 @@ class User {
         return result.affectedRows;
     }
 
+    static async updatePassword(id, hashedPassword) {
+        const [result] = await db.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, id]);
+        return result.affectedRows;
+    }
+
     static async delete(id) {
         const [result] = await db.query('DELETE FROM users WHERE id = ?', [id]);
         return result.affectedRows;

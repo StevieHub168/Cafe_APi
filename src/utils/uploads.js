@@ -90,4 +90,21 @@ function photosOf(row) {
     return photos;
 }
 
-module.exports = { UPLOAD_DIR, PUBLIC_PREFIX, MAX_BYTES, decodeImage, saveImage, removeImage, removeImageNow, isUploadName, photosOf };
+// The photos a booking / repair is saved with: only files uploaded through this app, no repeats, at most `max`.
+// `who` is the word used in the error ("booking", "repair").
+function cleanUploadedPhotos(list, who, max) {
+    if (list === null || list === undefined || list === '') return [];
+    if (!Array.isArray(list)) throw new Error('Photos must be a list');
+    const photos = [];
+    for (const item of list) {
+        const url = String(item ?? '').trim();
+        if (!url.startsWith(PUBLIC_PREFIX) || !isUploadName(url.slice(PUBLIC_PREFIX.length))) {
+            throw new Error(`A ${who} photo must be one uploaded from this app`);
+        }
+        if (!photos.includes(url)) photos.push(url);
+    }
+    if (photos.length > max) throw new Error(`A ${who} can have at most ${max} photos`);
+    return photos;
+}
+
+module.exports = { UPLOAD_DIR, PUBLIC_PREFIX, MAX_BYTES, decodeImage, saveImage, removeImage, removeImageNow, isUploadName, photosOf, cleanUploadedPhotos };

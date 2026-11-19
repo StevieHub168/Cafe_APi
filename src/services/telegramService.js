@@ -89,15 +89,17 @@ async function loadPhoto(photo, index) {
 
 const MEDIA_PROBLEM = /wrong (file|type)|failed to get http url|image_process_failed|photo_|wrong remote file|webpage_|media/i;
 
-/** Sends once to one chat. */
+/** Sends once to one chat. Answers the ids of the Telegram messages it made (a picture group is several), to take them down later. */
 async function deliver(token, chatId, text, photos) {
     const loaded = (await Promise.all(photos.map(loadPhoto))).filter(Boolean);
     const caption = text.length <= CAPTION_MAX;
     const base = { chat_id: chatId, parse_mode: 'HTML' };
+    const ids = [];
+    const note = (result) => { for (const message of [].concat(result || [])) if (message && message.message_id) ids.push(message.message_id); };
 
     if (loaded.length === 0) {
-        await call(token, 'sendMessage', { ...base, text: text.slice(0, TEXT_MAX), disable_web_page_preview: true });
-        return;
+        note(await call(token, 'sendMessage', { ...base, text: text.slice(0, TEXT_MAX), disable_web_page_preview: true }));
+        return ids;
     }
     const files = {};
     const media = loaded.map((photo, i) => {
@@ -108,18 +110,20 @@ async function deliver(token, chatId, text, photos) {
     if (media.length === 1) {
         const only = media[0];
         const fields = { ...base, photo: only.media, ...(caption ? { caption: text } : {}) };
-        if (files.photo0) { delete fields.photo; await call(token, 'sendPhoto', fields, { photo: files.photo0 }); }
-        else await call(token, 'sendPhoto', fields);
+        if (files.photo0) { delete fields.photo; note(await call(token, 'sendPhoto', fields, { photo: files.photo0 })); }
+        else note(await call(token, 'sendPhoto', fields));
     } else {
-        await call(token, 'sendMediaGroup', { chat_id: chatId, media }, files);
+        note(await call(token, 'sendMediaGroup', { chat_id: chatId, media }, files));
     }
     // Too long for a caption: the details follow as their own message.
-    if (!caption) await call(token, 'sendMessage', { ...base, text: text.slice(0, TEXT_MAX), disable_web_page_preview: true });
+    if (!caption) note(await call(token, 'sendMessage', { ...base, text: text.slice(0, TEXT_MAX), disable_web_page_preview: true }));
+    return ids;
 }
 
 /**
  * Sends a message to a group. `photos`: laptop photo first, then the invoice picture (each an /uploads/ path, an https address or a Buffer).
- * Never throws: { ok: true, group } or { ok: false, error } (plain words, no secrets).
+ * Never throws: { ok: true, group, chatId, messageIds } or { ok: false, error } (plain words, no secrets).
+ * (chatId + messageIds say exactly what was sent, so it can be taken down again with remove().)
  */
 async function send(group, { text, photos = [] }) {
     const settings = settingsFor(group);
@@ -129,8 +133,8 @@ async function send(group, { text, photos = [] }) {
     try {
         for (let attempt = 0; ; attempt++) {
             try {
-                await deliver(token, chatId, text, photos);
-                return { ok: true, group };
+                const messageIds = await deliver(token, chatId, text, photos);
+                return { ok: true, group, chatId, messageIds };
             } catch (error) {
                 // The group became a supergroup: Telegram tells the new id. Use it (and keep it until the .env is changed).
                 const moved = error.parameters && error.parameters.migrate_to_chat_id;
@@ -143,8 +147,8 @@ async function send(group, { text, photos = [] }) {
                 }
                 // A photo Telegram cannot use must not lose the message: send the words alone.
                 if (photos.length && attempt === 0 && MEDIA_PROBLEM.test(error.message)) {
-                    await deliver(token, chatId, text, []);
-                    return { ok: true, group, withoutPhotos: true };
+                    const messageIds = await deliver(token, chatId, text, []);
+                    return { ok: true, group, chatId, messageIds, withoutPhotos: true };
                 }
                 throw error;
             }
@@ -154,4 +158,29 @@ async function send(group, { text, photos = [] }) {
     }
 }
 
-module.exports = { send, status, settingsFor, GROUPS, _movedChats: movedChats };
+/**
+ * Takes messages down that the bot of this group sent. `sent` = [{ chat_id, ids: [..] }] (what send() answered).
+ * Never throws: { removed, failed }. A message that is already gone counts as removed.
+ */
+async function remove(group, sent) {
+    const settings = settingsFor(group);
+    const all = (sent || []).flatMap(entry => (entry.ids || []).map(id => ({ chatId: entry.chat_id, id })));
+    if (!settings) return { removed: 0, failed: all.length };
+    let removed = 0;
+    let failed = 0;
+    for (const { chatId, id } of all) {
+        try {
+            await call(settings.token, 'deleteMessage', { chat_id: chatId, message_id: id });
+            removed++;
+        } catch (error) {
+            if (/message to delete not found/i.test(error.message)) removed++;
+            else {
+                failed++;
+                console.warn(`Telegram: a message could not be taken down (${scrub(error.message, settings.token)})`);
+            }
+        }
+    }
+    return { removed, failed };
+}
+
+module.exports = { send, remove, status, settingsFor, GROUPS, _movedChats: movedChats };

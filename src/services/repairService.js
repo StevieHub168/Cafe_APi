@@ -3,11 +3,14 @@ const Product = require('../models/Product');
 const Invoice = require('../models/Invoice');
 const StockHold = require('./stockHoldService');
 const { cleanMoney, cleanPhone, cleanTelegram, cleanDate } = require('../utils/clean');
+const { cleanUploadedPhotos } = require('../utils/uploads');
+const { removeFilesNobodyUses } = require('./photoService');
 
 const STATUSES = ['received', 'fixed', 'picked_up'];
 const MAX_DEVICE = 80;     // one line on the printed invoice
 const MAX_PROBLEM = 140;   // two lines on the printed invoice
 const MAX_CUSTOMER = 100;
+const MAX_PHOTOS = 4;      // photos of what is wrong
 
 const notFound = () => Object.assign(new Error('Repair not found'), { statusCode: 404 });
 
@@ -70,7 +73,8 @@ async function prepare(input) {
         customer_name: optionalText(input.customer_name, 'Customer name', MAX_CUSTOMER),
         phone: cleanPhone(input.phone), telegram: cleanTelegram(input.telegram),
         problem, received_date: receivedDate, back_on: backOn, cost, status,
-        fixed_date: fixedDate, picked_up_date: pickedUpDate, sale_invoice_id: saleInvoiceId
+        fixed_date: fixedDate, picked_up_date: pickedUpDate, sale_invoice_id: saleInvoiceId,
+        images: cleanUploadedPhotos(input.images, 'repair', MAX_PHOTOS)
     };
 }
 
@@ -111,6 +115,7 @@ class RepairService {
             phone: current.phone, telegram: current.telegram, problem: current.problem,
             received_date: current.received_date, back_on: current.back_on, cost: current.cost, status: current.status,
             fixed_date: current.fixed_date, picked_up_date: current.picked_up_date, sale_invoice_id: current.sale_invoice_id,
+            images: current.images,
             ...(data || {})
         };
         // Going back a step forgets the later dates; going forward fills them in (prepare does that from the status).
@@ -130,6 +135,7 @@ class RepairService {
         if (wasHeld && !(willHold && sameProduct)) await StockHold.release(current.product_id);
 
         await Repair.update(id, { ...clean, stock_held: held });
+        await removeFilesNobodyUses(current.images.filter(url => !clean.images.includes(url)));      // a photo taken off the repair
         return Repair.findById(id);
     }
 
@@ -139,6 +145,7 @@ class RepairService {
         if (!deleted) throw notFound();
         // A repair that still held its laptop gives it back.
         if (current && current.stock_held && current.status === 'received') await StockHold.release(current.product_id);
+        await removeFilesNobodyUses(current ? current.images : []);
         return { message: 'Repair deleted successfully' };
     }
 }

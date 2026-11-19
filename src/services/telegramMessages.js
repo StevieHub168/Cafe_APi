@@ -29,6 +29,18 @@ const padNumber = (n) => String(n ?? '').padStart(6, '0');
 const nameKey = (name) => String(name || '').trim().replace(/\s+/g, ' ').toLowerCase();
 const cover = (product) => (product ? photosOf(product)[0] || null : null);
 
+// The photo of the product with this name (typed by hand, so it is not linked), also by the part before "|". null = none.
+async function coverNamed(name) {
+    const keys = [nameKey(name), nameKey(String(name || '').split('|')[0])].filter(Boolean);
+    if (keys.length === 0) return null;
+    const products = await Product.findAll({ includeArchived: true });
+    for (const key of keys) {
+        const found = products.find(product => nameKey(product.name) === key && cover(product));
+        if (found) return cover(found);
+    }
+    return null;
+}
+
 const missing = (what) => Object.assign(new Error(`${what} not found`), { statusCode: 404 });
 
 // ---------- Booking: "Booking Details" ----------
@@ -49,7 +61,9 @@ async function booking(id) {
         `• Status: ${STATUS[b.status] || b.status}`
     );
     const product = b.product_id ? await Product.findById(b.product_id) : null;
-    return { group: 'booking', text: lines.join('\n'), photos: [cover(product) || b.product_image].filter(Boolean) };
+    // The photo of its laptop first (product_image also finds a laptop that was typed by name, not picked), then the pictures added to the booking.
+    // The text is the caption of the first picture (Telegram's own rule: when it is too long, it follows as its own message).
+    return { group: 'booking', text: lines.join('\n'), photos: [cover(product) || b.product_image, ...photosOf(b)].filter(Boolean) };
 }
 
 // ---------- Repair: "REPAIR" ----------
@@ -65,7 +79,7 @@ async function repair(id) {
     if (r.cost !== null && r.cost !== undefined) lines.push(`• Cost: ${money(r.cost)}`);
     if (r.sale_invoice_number) lines.push(`• Bought here: Sale ${padNumber(r.sale_invoice_number)}${r.sale_warranty && r.sale_warranty !== 'none' ? ` · warranty ${WARRANTY[r.sale_warranty]}` : ''}`);
     const product = r.product_id ? await Product.findById(r.product_id) : null;
-    return { group: 'repair', text: lines.join('\n'), photos: [cover(product)].filter(Boolean) };
+    return { group: 'repair', text: lines.join('\n'), photos: [cover(product), ...photosOf(r)].filter(Boolean) };
 }
 
 // ---------- Sold: "SOLD" (+ the invoice picture the app made) ----------
@@ -84,16 +98,9 @@ async function sold(id) {
     let photo = null;
     const fromBooking = await Booking.findBySaleInvoice(invoice.id);
     if (fromBooking && fromBooking.product_id) photo = cover(await Product.findById(fromBooking.product_id));
-    if (!photo) {
-        const byName = new Map();
-        for (const product of await Product.findAll({ includeArchived: true })) {
-            const key = nameKey(product.name);
-            if (key && !byName.has(key) && cover(product)) byName.set(key, cover(product));
-        }
-        for (const item of invoice.items) {
-            const found = [nameKey(item.name), nameKey(String(item.name).split('|')[0])].map(key => byName.get(key)).find(Boolean);
-            if (found) { photo = found; break; }
-        }
+    for (const item of invoice.items) {
+        if (photo) break;
+        photo = await coverNamed(item.name);
     }
     return { group: 'sold', text: lines.join('\n'), photos: [photo].filter(Boolean) };
 }

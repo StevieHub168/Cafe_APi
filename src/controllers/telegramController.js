@@ -1,5 +1,6 @@
 const Telegram = require('../services/telegramService');
 const Messages = require('../services/telegramMessages');
+const BookingService = require('../services/bookingService');
 const { decodeImage } = require('../utils/uploads');
 
 class TelegramController {
@@ -11,6 +12,8 @@ class TelegramController {
     // POST /api/telegram/send   body: { kind: "booking" | "repair" | "sold", id, picture?: "data:image/png;base64,..." }
     // Sends that booking / repair / sale to its group (laptop photo first, then the invoice picture when there is one).
     // The sale, booking or repair is already saved: when Telegram fails this only says so (502), nothing is undone.
+    // A Booking message is remembered (its Telegram ids); when the Sale made from that booking is sent, the Booking message is taken
+    // down again: the laptop is sold, the Sold message says so. Answer: { sent, group, withoutPhotos, removedBooking? }.
     static async send(req, res) {
         try {
             const { kind, picture } = req.body || {};
@@ -25,7 +28,12 @@ class TelegramController {
 
             const message = await Messages.build(kind, id);
             const answer = await Telegram.send(message.group, { text: message.text, photos: [...message.photos, ...(invoicePicture ? [invoicePicture] : [])] });
-            if (answer.ok) return res.status(200).json({ sent: true, group: answer.group, withoutPhotos: !!answer.withoutPhotos });
+            if (answer.ok) {
+                let removedBooking = 0;
+                if (kind === 'booking') await BookingService.rememberTelegramMessages(id, answer.chatId, answer.messageIds);
+                if (kind === 'sold') removedBooking = await BookingService.takeDownBookingMessage(id);
+                return res.status(200).json({ sent: true, group: answer.group, withoutPhotos: !!answer.withoutPhotos, ...(removedBooking > 0 ? { removedBooking: true } : {}) });
+            }
             res.status(answer.notSetUp ? 503 : 502).json({ error: answer.error, notSetUp: !!answer.notSetUp });
         } catch (error) {
             res.status(error.statusCode || 400).json({ error: error.message });

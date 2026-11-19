@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   images JSON DEFAULT NULL,              -- up to 4 uploaded photos, e.g. the deposit receipt: ["/uploads/x.png"]
   sale_invoice_id INT DEFAULT NULL,      -- the Sale (invoice) made when the customer picked the laptop up (no foreign key: a deleted invoice just shows no number)
   stock_held TINYINT(1) NOT NULL DEFAULT 0,   -- 1 = this booking took one laptop off the shelf (counted stock -1, or a single laptop set aside); given back when it is cancelled / deleted
+  telegram_messages JSON DEFAULT NULL,   -- the Telegram messages sent for this booking: [{"chat_id":"-100123","ids":[41,42]}]. They are taken down when the laptop is sold.
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_bookings_status_pickup (status, pickup_date),
@@ -98,6 +99,7 @@ CREATE TABLE IF NOT EXISTS repairs (
   picked_up_date DATE DEFAULT NULL,
   sale_invoice_id INT DEFAULT NULL,      -- the Sale of this laptop when WE sold it (a warranty repair); no foreign key: a deleted invoice just shows no number
   stock_held TINYINT(1) NOT NULL DEFAULT 0,   -- 1 = this repair took one of the shop's laptops off the shelf while it is 'received'; given back when it is fixed / deleted
+  images JSON DEFAULT NULL,              -- up to 4 uploaded photos of what is wrong: ["/uploads/x.png"]
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_repairs_status_received (status, received_date),

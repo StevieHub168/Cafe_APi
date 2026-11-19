@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken');
 const crypto = require('node:crypto');
 const User = require('../models/User');
 
+const MIN_PASSWORD = 8;
+const MAX_PASSWORD_BYTES = 72;      // bcrypt only reads the first 72 bytes
+
 class AuthService {
     static async createUser(username, email, password, fullName, role = 'staff', phone = null) {
         const existingUserByEmail = await User.findByEmail(email);
@@ -51,6 +54,27 @@ class AuthService {
         // Return a sanitized user record without password/access_token fields.
         const safeUser = await User.findById(user.id);
         return { user: safeUser, token };
+    }
+
+    // Everyone who can sign in (never the passwords).
+    static async listUsers() {
+        return User.findAll();
+    }
+
+    // An admin sets a new password for a user. That user is signed out (they must sign in again with the new one).
+    // An admin changing their OWN password stays signed in.
+    static async resetPassword(userId, password, adminId) {
+        const id = Number(userId);
+        const user = Number.isInteger(id) && id > 0 ? await User.findById(id) : null;
+        if (!user) throw Object.assign(new Error('User not found'), { statusCode: 404 });
+
+        if (typeof password !== 'string' || password.trim() === '') throw new Error('Write the new password');
+        if (password.length < MIN_PASSWORD) throw new Error(`The password must be at least ${MIN_PASSWORD} characters`);
+        if (Buffer.byteLength(password) > MAX_PASSWORD_BYTES) throw new Error(`The password is too long (max ${MAX_PASSWORD_BYTES} characters)`);
+
+        await User.updatePassword(id, await bcrypt.hash(password, 10));
+        if (id !== Number(adminId)) await User.deleteAccessToken(id);
+        return { message: 'Password changed' };
     }
 
     // Get user by ID

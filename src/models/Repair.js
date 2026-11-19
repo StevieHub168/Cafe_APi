@@ -14,7 +14,7 @@ const SELECT = `
            DATE_FORMAT(s.invoice_date, '%Y-%m-%d') AS sale_date,
            s.warranty AS sale_warranty,
            r.stock_held, p.track_stock AS product_track_stock,
-           r.created_at, r.updated_at
+           r.images, r.created_at, r.updated_at
     FROM repairs r
     LEFT JOIN invoices s ON s.id = r.sale_invoice_id AND s.type = 'sale'
     LEFT JOIN products p ON p.id = r.product_id
@@ -28,6 +28,12 @@ function normalize(row) {
     // Did this repair take one of the shop's laptops off the shelf (while it is 'received')? Is that laptop counted stock (true) or single (false)?
     row.stock_held = Boolean(row.stock_held);
     row.product_track_stock = row.product_track_stock === null || row.product_track_stock === undefined ? null : Boolean(row.product_track_stock);
+    // The photos (what is wrong with it): a list of "/uploads/x.png".
+    let images = row.images;
+    if (typeof images === 'string') {
+        try { images = JSON.parse(images); } catch { images = null; }
+    }
+    row.images = Array.isArray(images) ? images : [];
     return row;
 }
 
@@ -51,6 +57,7 @@ class Repair {
               picked_up_date DATE DEFAULT NULL,
               sale_invoice_id INT DEFAULT NULL,
               stock_held TINYINT(1) NOT NULL DEFAULT 0,
+              images JSON DEFAULT NULL,
               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               INDEX idx_repairs_status_received (status, received_date),
@@ -59,12 +66,22 @@ class Repair {
             ) ENGINE=InnoDB
         `);
 
-        // A table made before "takes a laptop off the shelf" existed gets the column now.
-        const [[found]] = await db.query(
-            `SELECT COUNT(*) AS n FROM information_schema.COLUMNS
-             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'repairs' AND COLUMN_NAME = 'stock_held'`
-        );
-        if (!found.n) await db.query('ALTER TABLE repairs ADD COLUMN stock_held TINYINT(1) NOT NULL DEFAULT 0 AFTER sale_invoice_id');
+        // A table made before a column existed gets it now.
+        const has = async (column) => {
+            const [[found]] = await db.query(
+                `SELECT COUNT(*) AS n FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'repairs' AND COLUMN_NAME = ?`, [column]
+            );
+            return found.n > 0;
+        };
+        if (!(await has('stock_held'))) await db.query('ALTER TABLE repairs ADD COLUMN stock_held TINYINT(1) NOT NULL DEFAULT 0 AFTER sale_invoice_id');
+        if (!(await has('images'))) await db.query('ALTER TABLE repairs ADD COLUMN images JSON DEFAULT NULL AFTER stock_held');
+    }
+
+    // True when any repair still uses this uploaded photo.
+    static async usesPhoto(url) {
+        const [rows] = await db.query('SELECT id FROM repairs WHERE images LIKE ? LIMIT 1', [`%${url}%`]);
+        return rows.length > 0;
     }
 
     // What is still in the shop first (the one waiting longest on top); picked-up ones after them, newest first.
@@ -88,10 +105,11 @@ class Repair {
     static async create(data) {
         const [result] = await db.query(
             `INSERT INTO repairs (product_id, device, customer_name, phone, telegram, problem, received_date, back_on, cost,
-                                  status, fixed_date, picked_up_date, sale_invoice_id, stock_held)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                                  status, fixed_date, picked_up_date, sale_invoice_id, stock_held, images)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [data.product_id, data.device, data.customer_name, data.phone, data.telegram, data.problem, data.received_date,
-             data.back_on, data.cost, data.status, data.fixed_date, data.picked_up_date, data.sale_invoice_id, data.stock_held ? 1 : 0]
+             data.back_on, data.cost, data.status, data.fixed_date, data.picked_up_date, data.sale_invoice_id, data.stock_held ? 1 : 0,
+             JSON.stringify(data.images ?? [])]
         );
         return result.insertId;
     }
@@ -101,10 +119,11 @@ class Repair {
         const [result] = await db.query(
             `UPDATE repairs
              SET product_id = ?, device = ?, customer_name = ?, phone = ?, telegram = ?, problem = ?, received_date = ?,
-                 back_on = ?, cost = ?, status = ?, fixed_date = ?, picked_up_date = ?, sale_invoice_id = ?, stock_held = ?
+                 back_on = ?, cost = ?, status = ?, fixed_date = ?, picked_up_date = ?, sale_invoice_id = ?, stock_held = ?, images = ?
              WHERE id = ?`,
             [data.product_id, data.device, data.customer_name, data.phone, data.telegram, data.problem, data.received_date,
-             data.back_on, data.cost, data.status, data.fixed_date, data.picked_up_date, data.sale_invoice_id, data.stock_held ? 1 : 0, id]
+             data.back_on, data.cost, data.status, data.fixed_date, data.picked_up_date, data.sale_invoice_id, data.stock_held ? 1 : 0,
+             JSON.stringify(data.images ?? []), id]
         );
         return result.affectedRows > 0;
     }

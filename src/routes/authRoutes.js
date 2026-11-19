@@ -18,7 +18,7 @@ router.post('/logout', requireAuth, AuthController.logout);
 // GET /api/auth/me - Get current authenticated user
 router.get('/me', requireAuth, AuthController.me);
 
-// GET /api/auth/user/:id - Get user info
-router.get('/user/:id', AuthController.getUserInfo);
+// GET /api/auth/user/:id - Get user info (admin only: it shows the email, phone and role of a person)
+router.get('/user/:id', requireAuth, requireAdmin, AuthController.getUserInfo);
 
 module.exports = router;

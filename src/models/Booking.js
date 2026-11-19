@@ -10,7 +10,12 @@ const SELECT = `
            DATE_FORMAT(b.booking_date, '%Y-%m-%d') AS booking_date,
            DATE_FORMAT(b.pickup_date,  '%Y-%m-%d') AS pickup_date,
            b.status, b.images, b.sale_invoice_id, b.stock_held, b.created_at, b.updated_at,
-           p.image_url AS product_image, p.track_stock AS product_track_stock,
+           COALESCE(p.image_url, (
+               SELECT n.image_url FROM products n
+               WHERE n.image_url IS NOT NULL AND n.image_url <> ''
+                 AND n.name IN (TRIM(b.product_name), TRIM(SUBSTRING_INDEX(b.product_name, '|', 1)))
+               ORDER BY n.id DESC LIMIT 1
+           )) AS product_image, p.track_stock AS product_track_stock,
            s.number AS sale_invoice_number
     FROM bookings b
     LEFT JOIN products p ON p.id = b.product_id
@@ -51,6 +56,7 @@ class Booking {
               pickup_date DATE NOT NULL,
               status ENUM('booked', 'picked_up', 'cancelled') NOT NULL DEFAULT 'booked',
               images JSON DEFAULT NULL,
+              telegram_messages JSON DEFAULT NULL,
               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               INDEX idx_bookings_status_pickup (status, pickup_date),
@@ -70,6 +76,7 @@ class Booking {
         if (!(await has('images'))) await db.query('ALTER TABLE bookings ADD COLUMN images JSON DEFAULT NULL AFTER status');
         if (!(await has('sale_invoice_id'))) await db.query('ALTER TABLE bookings ADD COLUMN sale_invoice_id INT DEFAULT NULL AFTER images');
         if (!(await has('stock_held'))) await db.query('ALTER TABLE bookings ADD COLUMN stock_held TINYINT(1) NOT NULL DEFAULT 0 AFTER sale_invoice_id');
+        if (!(await has('telegram_messages'))) await db.query('ALTER TABLE bookings ADD COLUMN telegram_messages JSON DEFAULT NULL AFTER stock_held');
     }
 
     // True when any booking still uses this uploaded photo.
@@ -144,6 +151,29 @@ class Booking {
     static async findBySaleInvoice(invoiceId) {
         const [rows] = await db.query(`${SELECT} WHERE b.sale_invoice_id = ?`, [invoiceId]);
         return normalize(rows[0]);
+    }
+
+    // The Telegram messages sent for this booking, so they can be taken down when the laptop is sold:
+    // [{ chat_id: "-100123", ids: [41, 42] }]  (a photo with several pictures is several messages). Not part of the booking the app sees.
+    static async getTelegramMessages(id) {
+        const [rows] = await db.query('SELECT telegram_messages FROM bookings WHERE id = ?', [id]);
+        let list = rows[0] ? rows[0].telegram_messages : null;
+        if (typeof list === 'string') {
+            try { list = JSON.parse(list); } catch { list = null; }
+        }
+        return Array.isArray(list) ? list : [];
+    }
+
+    // Adds what was just sent (a second send keeps the first one: both get taken down).
+    static async addTelegramMessages(id, chatId, messageIds) {
+        if (!Array.isArray(messageIds) || messageIds.length === 0) return;
+        const list = await Booking.getTelegramMessages(id);
+        list.push({ chat_id: String(chatId), ids: messageIds });
+        await db.query('UPDATE bookings SET telegram_messages = ? WHERE id = ?', [JSON.stringify(list), id]);
+    }
+
+    static async clearTelegramMessages(id) {
+        await db.query('UPDATE bookings SET telegram_messages = NULL WHERE id = ?', [id]);
     }
 
     static async delete(id) {
