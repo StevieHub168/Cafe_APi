@@ -75,8 +75,9 @@ function whereOf(filters: ProductFilters): WhereOptions {
     return { [Op.and]: all };
 }
 
-// By category, then by name; the id makes the order the same every time (two laptops can have the same name).
-const ORDER: FindOptions['order'] = [[{ model: Category, as: 'category' }, 'name', 'ASC'], ['name', 'ASC'], ['id', 'ASC']];
+// Laptops that are not sold yet come first and the sold ones last; inside each group by category, then by name. The id makes the order
+// the same every time (two laptops can have the same name). A laptop that is booked or in repair is not sold: it stays in the first group.
+const ORDER: FindOptions['order'] = [['is_archived', 'ASC'], [{ model: Category, as: 'category' }, 'name', 'ASC'], ['name', 'ASC'], ['id', 'ASC']];
 
 type ProductChanges = Partial<ProductInput> & { is_archived?: number | boolean };
 

@@ -279,6 +279,28 @@ test('products: the Menu list leaves out sold and set-aside laptops, the Product
     assert.equal((await get('/products?include_archived=true&page=1&per_page=100')).total, 25);
 });
 
+test('products: the ones not sold yet come first and the sold ones last, also page by page; inside a group by category, then name', { skip }, async () => {
+    const all = await get('/products?include_archived=true');
+    const firstSold = all.findIndex((p: any) => p.is_archived);
+    assert.equal(firstSold, 23, '23 are not sold (the one that is set aside is not sold) and they come first');
+    assert.ok(all.slice(0, firstSold).every((p: any) => !p.is_archived));
+    assert.ok(all.slice(firstSold).every((p: any) => p.is_archived), 'once the sold ones start, no unsold one follows');
+    assert.equal(all.length - firstSold, 2);
+
+    // Pages follow the same order: the first two pages of 10 have no sold laptop, and all the pages together are the plain list.
+    const page1 = await get('/products?include_archived=true&page=1&per_page=10');
+    const page2 = await get('/products?include_archived=true&page=2&per_page=10');
+    assert.ok([...page1.results, ...page2.results].every((p: any) => !p.is_archived));
+    assert.deepEqual(ids((await readAllPages('/products?include_archived=true', 10)).rows), ids(all));
+
+    // Inside each group: by category, then by name (as before).
+    const sortKey = (p: any) => `${p.category_name}|${p.name}`.toLowerCase();
+    for (const group of [all.slice(0, firstSold), all.slice(firstSold)]) {
+        const keys = group.map(sortKey);
+        assert.deepEqual(keys, [...keys].sort());
+    }
+});
+
 test('products: category, brand and search, together with pages', { skip }, async () => {
     assert.equal((await get(`/products?include_archived=true&category_id=${seeded.macId}&page=1&per_page=100`)).total, 12);
     assert.equal((await get(`/products?include_archived=true&category_id=${seeded.winId}&page=1&per_page=5`)).total, 13);
